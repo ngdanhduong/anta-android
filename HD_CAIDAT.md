@@ -83,12 +83,16 @@ Hệ thống được tổ chức chuẩn hóa và phân định rõ ràng thàn
 ```
 hdv/
 ├── frontend/                    # 🌐 TOÀN BỘ GIAO DIỆN WEB
-│   ├── index.html               # Trang điều hướng tập trung vào các cổng Web
-│   ├── sportbooking/            # Web Quản trị Admin, Cổng Chủ Sân & Đặt chỗ Khách hàng
-│   │   ├── admin.html           # Bảng điều khiển Quản trị viên
-│   │   ├── owner.html           # Cổng dành cho Chủ sân
-│   │   └── index.html           # Web đặt sân trực tuyến
-│   └── demo-web/                # Landing Page giới thiệu hệ thống
+│   ├── index.html               # Trang điều hướng tập trung vào các cổng Web Anta
+│   ├── README.md                # Hướng dẫn chi tiết phân hệ Web
+│   ├── admin/                   # 👑 Cổng Quản Trị Hệ Thống (Anta Admin Portal)
+│   │   ├── index.html           # Bảng điều khiển Quản trị viên
+│   │   ├── app.js               # Logic gọi API Quản trị
+│   │   └── style.css            # Style giao diện
+│   └── owner/                   # 🏟️ Cổng Dành Cho Chủ Sân (Anta Owner Portal)
+│       ├── index.html           # Giao diện vận hành lịch sân & check-in
+│       ├── app.js               # Logic gọi API Kênh chủ sân
+│       └── style.css            # Style giao diện
 │
 ├── backend/                     # ⚙️ TOÀN BỘ MÃ NGUỒN MÁY CHỦ & ỨNG DỤNG DI ĐỘNG
 │   ├── app/                     # 📱 Ứng dụng di động Android (Jetpack Compose, Kotlin)
@@ -117,6 +121,6 @@ hdv/
   * Mở thư mục dự án trong Android Studio và chạy Run.
   * Ứng dụng đã có sẵn nút chuyển đổi nhanh sang Web cho **Chủ sân & Admin** tại màn hình Đăng nhập.
 * **Web Admin & Chủ sân (`frontend/`)**:
-  * Mở [frontend/index.html](file:///d:/hdv/frontend/index.html) để truy cập trung tâm điều hướng Web.
-  * Mở [frontend/sportbooking/admin.html](file:///d:/hdv/frontend/sportbooking/admin.html) để truy cập Cổng Quản Trị Hệ Thống.
-  * Mở [frontend/sportbooking/owner.html](file:///d:/hdv/frontend/sportbooking/owner.html) để truy cập Cổng Chủ Sân.
+  * Mở [frontend/index.html](file:///d:/hdv/frontend/index.html) để truy cập trung tâm điều hướng Web Anta.
+  * Mở [frontend/admin/index.html](file:///d:/hdv/frontend/admin/index.html) để truy cập Cổng Quản Trị Hệ Thống Anta.
+  * Mở [frontend/owner/index.html](file:///d:/hdv/frontend/owner/index.html) để truy cập Cổng Chủ Sân Anta.

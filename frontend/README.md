@@ -1,6 +1,6 @@
 # PHÂN HỆ GIAO DIỆN WEB (FRONTEND) - ANTA SPORTS PLATFORM
 
-Thư mục `frontend/` chứa toàn bộ các giao diện người dùng trên nền tảng Web của hệ sinh thái Anta.
+Thư mục `frontend/` chứa toàn bộ các giao diện người dùng trên nền tảng Web chính thức của dự án **Anta**:
 
 ---
 
@@ -8,35 +8,30 @@ Thư mục `frontend/` chứa toàn bộ các giao diện người dùng trên n
 
 ```
 frontend/
-├── index.html                   # Trang điều hướng tập trung vào các cổng Web
-├── sportbooking/                # Bộ mã nguồn Web Admin, Chủ Sân & Khách Hàng
-│   ├── admin.html               # Cổng Quản trị Hệ thống (Admin Portal)
-│   ├── owner.html               # Cổng Dành cho Chủ Sân (Owner Portal)
-│   ├── index.html               # Trang đặt sân trực tuyến dành cho khách hàng
-│   ├── login.html               # Trang đăng nhập phân hệ đối tác
-│   ├── css/                     # Toàn bộ CSS giao diện & theme
-│   ├── js/                      # Logic điều khiển, data mockup & kết nối API
-│   └── assets/                  # Hình ảnh, logo, icon, phông chữ
-└── demo-web/                    # Landing Page giới thiệu nền tảng & tải ứng dụng
-    ├── index.html               # Trang giới thiệu ứng dụng
-    ├── demo.css                 # Style trang landing page
-    └── demo.js                  # Hiệu ứng trang landing page
+├── index.html                   # Trang điều hướng tập trung vào 2 cổng Web Anta
+├── admin/                       # Cổng Quản Trị Hệ Thống (Anta Admin Portal)
+│   ├── index.html               # Giao diện đăng nhập & quản trị tài khoản, cơ sở
+│   ├── app.js                   # Logic xử lý gọi API Quản trị (/api/v1)
+│   └── style.css                # Style giao diện Quản trị
+│
+└── owner/                       # Cổng Dành Cho Chủ Sân (Anta Venue Owner Portal)
+    ├── index.html               # Giao diện vận hành lịch sân, duyệt đơn, check-in
+    ├── app.js                   # Logic xử lý gọi API Kênh chủ sân (/api/v1/owner/*)
+    └── style.css                # Style giao diện Kênh chủ sân
 ```
 
 ---
 
-## 🚀 Hướng dẫn mở và trải nghiệm
+## 🚀 Hướng dẫn mở và sử dụng
 
-1. **Cách nhanh nhất**: Mở trực tiếp file `frontend/index.html` bằng trình duyệt (Chrome, Edge, Firefox).
-2. Chọn cổng giao diện cần làm việc:
-   - **Admin Portal**: Quản lý cơ sở sân, doanh thu tổng, phân quyền tài khoản.
-   - **Owner Portal**: Giám sát lịch đặt sân thực tế, duyệt đơn, check-in tại sân.
-   - **Customer Portal**: Xem danh mục sân bãi, chọn khung giờ trống và đặt chỗ.
-   - **Demo Web**: Trang giới thiệu tổng quan hệ sinh thái Anta.
+* Mở file `frontend/index.html` trong trình duyệt.
+* Hoặc truy cập trực tiếp:
+  - **Quản trị Anta:** [frontend/admin/index.html](admin/index.html)
+  - **Kênh Chủ sân Anta:** [frontend/owner/index.html](owner/index.html)
 
 ---
 
-## 🌐 Kết nối API Backend (Microservices)
+## 🌐 Kết nối API Microservices
 
-Tất cả các trang Web khi kết nối dữ liệu động sẽ gọi qua **API Gateway** tại địa chỉ:
+Tất cả các trang Web khi gửi nhận dữ liệu động đều kết nối qua **API Gateway** tại:
 * **API Gateway URL**: `http://localhost:8080/api/v1`

@@ -47,7 +47,7 @@ echo  - Eureka Server Dashboard:             http://localhost:8761
 echo  - Booking API qua Gateway:              http://localhost:8080/api/v1/bookings
 echo  - Yard Catalog qua Gateway:             http://localhost:8080/api/v1/yards
 echo  - Auth API qua Gateway:                 http://localhost:8080/api/v1/auth/instance-info
-echo  - Web Admin / Chu san / Booking:        %FRONTEND_DIR%sportbooking\index.html
+echo  - Web Admin & Chu san Anta:            %FRONTEND_DIR%index.html
 echo =====================================================================
 echo.
 pause
