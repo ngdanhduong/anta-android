@@ -8,12 +8,12 @@ echo.
 
 set "BASE_DIR=%~dp0"
 set "FRONTEND_DIR=%~dp0frontend\"
-if exist "%~dp0backend\service-registry" (
-    set "BASE_DIR=%~dp0backend\"
+if exist "%~dp0service-registry" (
+    set "BASE_DIR=%~dp0"
     set "FRONTEND_DIR=%~dp0frontend\"
 ) else (
-    set "BASE_DIR=%~dp0"
-    set "FRONTEND_DIR=%~dp0..\frontend\"
+    set "BASE_DIR=%~dp0backend\"
+    set "FRONTEND_DIR=%~dp0frontend\"
 )
 
 echo [1/7] Dang khoi dong Service Registry (Eureka Server - Port 8761)...

@@ -1,6 +1,6 @@
 # Anta
 
-Android app for finding sports venues and booking court time. Module located at `backend/app/`: Kotlin, Jetpack Compose, Material 3, one activity.
+Android app for finding sports venues and booking court time. Module `anta/`: Kotlin, Jetpack Compose, Material 3, one activity.
 
 It talks to the backend kept in the `backend/` folder (or deployed API server).
 
