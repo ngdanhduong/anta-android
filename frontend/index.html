@@ -1,0 +1,200 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ANTA Sports - Cổng Giao Diện Web Frontend</title>
+    <link rel="stylesheet" href="sportbooking/css/anta-portal.css">
+    <style>
+        :root {
+            --primary: #0284c7;
+            --primary-dark: #0369a1;
+            --accent: #10b981;
+            --dark: #0f172a;
+            --slate: #334155;
+            --light: #f8fafc;
+            --border: #e2e8f0;
+            --card-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.08), 0 8px 10px -6px rgba(0, 0, 0, 0.04);
+        }
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+        body {
+            font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
+            background: linear-gradient(135deg, #f0fdf4 0%, #f8fafc 50%, #f0f9ff 100%);
+            color: var(--dark);
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+        }
+        header {
+            background: #ffffff;
+            border-bottom: 1px solid var(--border);
+            padding: 1.25rem 2rem;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.03);
+        }
+        .brand {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            font-size: 1.35rem;
+            font-weight: 700;
+            color: var(--dark);
+        }
+        .brand-badge {
+            background: #e0f2fe;
+            color: var(--primary);
+            font-size: 0.75rem;
+            padding: 4px 10px;
+            border-radius: 9999px;
+            font-weight: 600;
+            text-transform: uppercase;
+        }
+        .container {
+            max-width: 1100px;
+            margin: 2.5rem auto;
+            padding: 0 1.5rem;
+            flex: 1;
+        }
+        .hero {
+            text-align: center;
+            margin-bottom: 3rem;
+        }
+        .hero h1 {
+            font-size: 2.25rem;
+            font-weight: 800;
+            color: #0f172a;
+            margin-bottom: 0.75rem;
+        }
+        .hero p {
+            color: var(--slate);
+            font-size: 1.05rem;
+            max-width: 650px;
+            margin: 0 auto;
+        }
+        .grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+            gap: 1.5rem;
+        }
+        .portal-card {
+            background: #ffffff;
+            border: 1px solid var(--border);
+            border-radius: 16px;
+            padding: 1.75rem;
+            box-shadow: var(--card-shadow);
+            transition: all 0.25s ease;
+            display: flex;
+            flex-direction: column;
+            text-decoration: none;
+            color: inherit;
+        }
+        .portal-card:hover {
+            transform: translateY(-4px);
+            border-color: var(--primary);
+            box-shadow: 0 20px 25px -5px rgba(2, 132, 199, 0.15);
+        }
+        .card-icon {
+            font-size: 2.2rem;
+            margin-bottom: 1rem;
+            display: inline-block;
+        }
+        .card-title {
+            font-size: 1.25rem;
+            font-weight: 700;
+            color: #0f172a;
+            margin-bottom: 0.5rem;
+        }
+        .card-desc {
+            color: var(--slate);
+            font-size: 0.92rem;
+            line-height: 1.5;
+            margin-bottom: 1.5rem;
+            flex: 1;
+        }
+        .btn-link {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            padding: 0.65rem 1.25rem;
+            border-radius: 10px;
+            font-weight: 600;
+            font-size: 0.9rem;
+            background: var(--light);
+            color: var(--primary);
+            border: 1px solid var(--border);
+            transition: all 0.2s;
+        }
+        .portal-card:hover .btn-link {
+            background: var(--primary);
+            color: #ffffff;
+            border-color: var(--primary);
+        }
+        footer {
+            text-align: center;
+            padding: 2rem;
+            color: #64748b;
+            font-size: 0.88rem;
+            border-top: 1px solid var(--border);
+            background: #ffffff;
+        }
+    </style>
+</head>
+<body>
+    <header>
+        <div class="brand">
+            <span>🏟️ ANTA Sports Platform</span>
+            <span class="brand-badge">Frontend Hub</span>
+        </div>
+        <div style="font-size: 0.9rem; color: #64748b;">
+            Microservices API Gateway: <code>http://localhost:8080</code>
+        </div>
+    </header>
+
+    <main class="container">
+        <section class="hero">
+            <h1>Trung Tâm Điều Hướng Giao Diện Web Frontend</h1>
+            <p>Chọn phân hệ giao diện phù hợp để đăng nhập hoặc xem trang mẫu trải nghiệm.</p>
+        </section>
+
+        <div class="grid">
+            <!-- Admin Portal -->
+            <a href="sportbooking/admin.html" class="portal-card">
+                <div class="card-icon">👑</div>
+                <h2 class="card-title">Cổng Quản Trị (Admin)</h2>
+                <p class="card-desc">Bảng điều khiển doanh thu tổng, quản lý danh sách cơ sở sân bãi, phân quyền tài khoản và báo cáo hệ thống.</p>
+                <div class="btn-link">Mở Admin Portal →</div>
+            </a>
+
+            <!-- Owner Portal -->
+            <a href="sportbooking/owner.html" class="portal-card">
+                <div class="card-icon">🏟️</div>
+                <h2 class="card-title">Cổng Chủ Sân (Owner)</h2>
+                <p class="card-desc">Quản lý lịch đặt sân theo thời gian thực, duyệt đơn đặt, check-in khách đến sân và doanh thu từng sân con.</p>
+                <div class="btn-link">Mở Owner Portal →</div>
+            </a>
+
+            <!-- Customer Booking -->
+            <a href="sportbooking/index.html" class="portal-card">
+                <div class="card-icon">⚡</div>
+                <h2 class="card-title">Web Đặt Sân (Khách hàng)</h2>
+                <p class="card-desc">Giao diện người dùng tìm kiếm sân thể thao, xem giá, chọn khung giờ trống và đặt chỗ trực tuyến.</p>
+                <div class="btn-link">Mở Booking Portal →</div>
+            </a>
+
+            <!-- Demo Web -->
+            <a href="demo-web/index.html" class="portal-card">
+                <div class="card-icon">🌐</div>
+                <h2 class="card-title">Landing Page Giới Thiệu</h2>
+                <p class="card-desc">Trang giới thiệu nền tảng Anta Sports, các tính năng nổi bật và tải ứng dụng di động Android.</p>
+                <div class="btn-link">Mở Landing Page →</div>
+            </a>
+        </div>
+    </main>
+
+    <footer>
+        Hệ thống Anta Sports Platform &bull; Kiến trúc Microservices &copy; 2026
+    </footer>
+</body>
+</html>

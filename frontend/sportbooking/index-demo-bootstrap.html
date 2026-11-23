@@ -1,0 +1,105 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Đặt Sân Thể Thao - Trang Chủ</title>
+    <!-- 1. Nhúng Bootstrap 5+1 CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@6.0.0-alpha.1/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-B/GM4XqrwHnWXNOWMbloTmrYXZg10cakYGmpfsR/bbzQ6JAJI4ihuyADKLnBgrCe" crossorigin="anonymous">
+    <!-- Nhúng FontAwesome để dùng icon (kính lúp, điện thoại, user...) -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css">
+</head>
+<body class="bg-light">
+
+    <!-- HEADER / NAVIGATION BAR -->
+    <nav class="navbar navbar-expand-lg navbar-dark bg-success shadow-sm">
+        <div class="container">
+            <a class="navbar-brand fw-bold" href="index.html"><i class="fa-solid fa-futbol me-2"></i>SportBooking</a>
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+            <div class="collapse navbar-collapse" id="navbarNav">
+                <ul class="navbar-nav me-auto">
+                    <li class="nav-item"><a class="nav-link active" href="index.html">Trang chủ</a></li>
+                    <li class="nav-item"><a class="nav-link" href="#">Danh sách sân</a></li>
+                    <li class="nav-item"><a class="nav-link" href="#">Lịch sử đặt sân</a></li>
+                </ul>
+                <div class="d-flex">
+                    <a href="login.html" class="btn btn-outline-light me-2">Đăng nhập</a>
+                    <a href="login.html#register" class="btn btn-warning fw-bold">Đăng ký</a>
+                </div>
+            </div>
+        </div>
+    </nav>
+
+    <!-- BANNER TÌM KIẾM -->
+    <div class="container my-4">
+        <div class="p-4 bg-white rounded shadow-sm">
+            <h4 class="mb-3 text-success fw-bold">Tìm kiếm sân thể thao</h4>
+            <form class="row g-3">
+                <div class="col-md-4">
+                    <input type="text" class="form-control" placeholder="Tên sân, địa chỉ...">
+                </div>
+                <div class="col-md-3">
+                    <select class="form-select">
+                        <option selected>Tất cả loại sân</option>
+                        <option value="1">Sân bóng đá 7 người</option>
+                        <option value="2">Sân bóng đá 5 người</option>
+                        <option value="3">Sân cầu lông</option>
+                    </select>
+                </div>
+                <div class="col-md-3">
+                    <input type="date" class="form-control">
+                </div>
+                <div class="col-md-2">
+                    <button type="button" class="btn btn-success w-100"><i class="fa-solid fa-magnifying-glass me-1"></i> Tìm kiếm</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- DANH SÁCH SÂN THỂ THAO -->
+    <div class="container my-4">
+        <h3 class="fw-bold mb-3">Sân bóng nổi bật</h3>
+        <div class="row g-4" id="san-container">
+            
+            <!-- Thẻ Sân bóng 1 (Card) -->
+            <div class="col-md-4">
+                <div class="card h-100 shadow-sm">
+                    <img src="https://via.placeholder.com/400x250" class="card-img-top" alt="Sân Cầu Giấy">
+                    <div class="card-body">
+                        <span class="badge bg-success mb-2">Sân bóng đá</span>
+                        <h5 class="card-title fw-bold">Sân Bóng Cầu Giấy 1</h5>
+                        <p class="card-text text-muted mb-1"><i class="fa-solid fa-location-dot me-2"></i>123 Cầu Giấy, Hà Nội</p>
+                        <p class="text-danger fw-bold fs-5 mb-2">300.000 VNĐ / giờ</p>
+                        <a href="#" class="btn btn-primary w-100">Xem chi tiết & Đặt sân</a>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Thẻ Sân bóng 2 (Card) -->
+            <div class="col-md-4">
+                <div class="card h-100 shadow-sm">
+                    <img src="https://via.placeholder.com/400x250" class="card-img-top" alt="Sân Mỹ Đình">
+                    <div class="card-body">
+                        <span class="badge bg-warning text-dark mb-2">Sân cầu lông</span>
+                        <h5 class="card-title fw-bold">Sân Cầu Lông Mỹ Đình A</h5>
+                        <p class="card-text text-muted mb-1"><i class="fa-solid fa-location-dot me-2"></i>45 Mỹ Đình, Hà Nội</p>
+                        <p class="text-danger fw-bold fs-5 mb-2">150.000 VNĐ / giờ</p>
+                        <a href="#" class="btn btn-primary w-100">Xem chi tiết & Đặt sân</a>
+                    </div>
+                </div>
+            </div>
+
+        </div>
+    </div>
+
+    <!-- FOOTER -->
+    <footer class="bg-dark text-white text-center py-3 mt-5">
+        <p class="mb-0">&copy; 2026 Hệ thống đặt sân thể thao. All rights reserved.</p>
+    </footer>
+
+    <!-- 2. Nhúng Bootstrap 5 JavaScript (Cần thiết cho menu mobile, modal, dropdown...) -->
+    <script type="module" src="https://cdn.jsdelivr.net/npm/bootstrap@6.0.0-alpha.1/dist/js/bootstrap.bundle.min.js" integrity="sha384-1a/pXj49ZQ1aHEmrJ+gMw1otqoVsYwlEnlD8mIfY2TV03r20Y0CN7uqx1tQogjPL" crossorigin="anonymous"></script>
+</body>
+</html>

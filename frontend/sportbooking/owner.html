@@ -1,0 +1,1895 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Cổng Chủ Sân - Anta SportBooking</title>
+  <link rel="stylesheet" href="css/anta-portal.css">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <style>
+    /* Bổ sung style trực quan cho biểu đồ và heatmap */
+    .bar-chart {
+      display: flex;
+      align-items: flex-end;
+      gap: 16px;
+      height: 180px;
+      padding-top: 24px;
+      padding-bottom: 8px;
+      border-bottom: 1px solid var(--line);
+    }
+    .bar-col {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 6px;
+      height: 100%;
+      justify-content: flex-end;
+    }
+    .bar-col .bar {
+      width: 100%;
+      max-width: 38px;
+      background: var(--primary);
+      border-radius: 6px 6px 0 0;
+      transition: height 0.4s ease, background 0.2s;
+      position: relative;
+    }
+    .bar-col .bar:hover {
+      background: var(--green);
+    }
+    .bar-col .bar .bar-val {
+      position: absolute;
+      top: -22px;
+      left: 50%;
+      transform: translateX(-50%);
+      font-size: 10.5px;
+      font-weight: 700;
+      color: var(--muted);
+      white-space: nowrap;
+    }
+    .bar-col .bar-label {
+      font-size: 11px;
+      color: var(--muted);
+      font-weight: 600;
+    }
+    .court-progress-list {
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+    }
+    .court-prog-item {
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
+    }
+    .court-prog-head {
+      display: flex;
+      justify-content: space-between;
+      font-size: 12px;
+      font-weight: 600;
+    }
+    .court-prog-bar {
+      height: 8px;
+      background: #e2e8f0;
+      border-radius: 999px;
+      overflow: hidden;
+    }
+    .court-prog-fill {
+      height: 100%;
+      background: var(--primary);
+      border-radius: 999px;
+    }
+    .heatmap-grid {
+      display: grid;
+      grid-template-columns: 50px repeat(7, 1fr);
+      gap: 4px;
+      font-size: 11px;
+      text-align: center;
+      margin-top: 10px;
+    }
+    .heatmap-cell {
+      padding: 6px 2px;
+      border-radius: 4px;
+      font-weight: 600;
+    }
+    .hm-0 { background: #f1f5f9; color: #94a3b8; }
+    .hm-1 { background: #e0f2fe; color: #0369a1; }
+    .hm-2 { background: #bae6fd; color: #0284c7; }
+    .hm-3 { background: #7dd3fc; color: #0369a1; }
+    .hm-4 { background: #0A93A3; color: #fff; }
+    .tab-nav {
+      display: flex;
+      gap: 8px;
+      border-bottom: 1px solid var(--line);
+      margin-bottom: 16px;
+    }
+    .tab-nav-btn {
+      all: unset;
+      padding: 8px 16px;
+      font-size: 13px;
+      font-weight: 600;
+      color: var(--muted);
+      cursor: pointer;
+      border-bottom: 2px solid transparent;
+      margin-bottom: -1px;
+      transition: all 0.15s;
+    }
+    .tab-nav-btn.active {
+      color: var(--primary);
+      border-bottom-color: var(--primary);
+    }
+    .timeline {
+      display: flex;
+      flex-direction: column;
+      gap: 16px;
+      position: relative;
+      padding-left: 20px;
+    }
+    .timeline::before {
+      content: "";
+      position: absolute;
+      left: 6px;
+      top: 6px;
+      bottom: 6px;
+      width: 2px;
+      background: var(--line);
+    }
+    .timeline-item {
+      position: relative;
+    }
+    .timeline-dot {
+      position: absolute;
+      left: -20px;
+      top: 3px;
+      width: 12px;
+      height: 12px;
+      border-radius: 50%;
+      background: var(--primary);
+      border: 2px solid #fff;
+      box-shadow: 0 0 0 2px var(--line);
+    }
+    .timeline-dot.done { background: var(--green); }
+    .timeline-time {
+      font-size: 11px;
+      color: var(--muted);
+      font-weight: 600;
+    }
+    .timeline-desc {
+      font-size: 12.5px;
+      font-weight: 600;
+      color: var(--text);
+    }
+    .toast-msg {
+      position: fixed;
+      bottom: 24px;
+      right: 24px;
+      background: #0F2533;
+      color: #fff;
+      padding: 12px 20px;
+      border-radius: 8px;
+      font-size: 13px;
+      font-weight: 600;
+      box-shadow: var(--shadow);
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      z-index: 10000;
+      opacity: 0;
+      transform: translateY(10px);
+      transition: all 0.25s ease;
+      pointer-events: none;
+    }
+    .toast-msg.show {
+      opacity: 1;
+      transform: translateY(0);
+    }
+  </style>
+</head>
+<body>
+  <div class="app-shell">
+    <!-- SIDEBAR BÊN TRÁI (THEO ĐÚNG PDF TRANG 3-10) -->
+    <aside class="sidebar">
+      <div class="brand-box">
+        <div class="brand-icon"><i class="fa-solid fa-table-tennis-paddle-ball" style="color:var(--primary);"></i></div>
+        <div>
+          <div class="brand-name">Anta Arena</div>
+          <div class="brand-sub">Cổng Chủ Cơ Sở</div>
+        </div>
+      </div>
+
+      <!-- Chọn cơ sở -->
+      <div class="branch-select-box">
+        <label><i class="fa-solid fa-location-dot"></i> Cơ sở đang quản lý</label>
+        <select id="branchSelector" onchange="onBranchChange()">
+          <option value="arena-thuduc" selected>Anta Arena Thủ Đức (6 sân)</option>
+          <option value="arena-binhthanh">Anta Sports Bình Thạnh (4 sân)</option>
+          <option value="arena-q7">Pickleball Hub Quận 7 (8 sân)</option>
+        </select>
+      </div>
+
+      <!-- Menu VẬN HÀNH -->
+      <div class="nav-group-title">VẬN HÀNH</div>
+      <nav class="side-menu">
+        <button class="nav-btn active" data-view="stats" onclick="switchView('stats')">
+          <span class="nav-btn-left"><i class="fa-solid fa-chart-pie"></i> Thống kê</span>
+        </button>
+        <button class="nav-btn" data-view="schedule" onclick="switchView('schedule')">
+          <span class="nav-btn-left"><i class="fa-solid fa-calendar-days"></i> Lịch sân</span>
+        </button>
+        <button class="nav-btn" data-view="bookings" onclick="switchView('bookings')">
+          <span class="nav-btn-left"><i class="fa-solid fa-receipt"></i> Đơn đặt</span>
+          <span class="badge" id="badgePendingBookings">3</span>
+        </button>
+        <button class="nav-btn" data-view="cancellations" onclick="switchView('cancellations')">
+          <span class="nav-btn-left"><i class="fa-solid fa-rotate-left"></i> Yêu cầu huỷ</span>
+          <span class="badge" id="badgeCancellations">2</span>
+        </button>
+      </nav>
+
+      <!-- Menu CƠ SỞ -->
+      <div class="nav-group-title">CƠ SỞ & TÀI CHÍNH</div>
+      <nav class="side-menu">
+        <button class="nav-btn" data-view="courts" onclick="switchView('courts')">
+          <span class="nav-btn-left"><i class="fa-solid fa-cubes"></i> Sân và giá</span>
+        </button>
+        <button class="nav-btn" data-view="services" onclick="switchView('services')">
+          <span class="nav-btn-left"><i class="fa-solid fa-bottle-water"></i> Dịch vụ & Kho</span>
+        </button>
+        <button class="nav-btn" data-view="cashflow" onclick="switchView('cashflow')">
+          <span class="nav-btn-left"><i class="fa-solid fa-wallet"></i> Thu chi tại sân</span>
+        </button>
+      </nav>
+
+      <!-- Menu LỐI TẮT HỆ THỐNG -->
+      <div class="nav-group-title">LỐI TẮT</div>
+      <nav class="side-menu">
+        <a href="index.html" class="nav-btn" style="text-decoration:none;">
+          <span class="nav-btn-left"><i class="fa-solid fa-arrow-up-right-from-square"></i> Web Đặt Sân</span>
+        </a>
+        <a href="admin.html" class="nav-btn" style="text-decoration:none;">
+          <span class="nav-btn-left"><i class="fa-solid fa-shield-halved"></i> Cổng Admin</span>
+        </a>
+      </nav>
+
+      <!-- Footer User Profile -->
+      <div class="user-profile-bar">
+        <div class="user-profile-info">
+          <div class="avatar-circle">MT</div>
+          <div>
+            <div class="user-profile-name" id="ownerNameDisplay">Nguyễn Minh Tâm</div>
+            <div class="user-profile-role">Chủ cơ sở (Arena Thủ Đức)</div>
+          </div>
+        </div>
+        <button class="btn-logout" title="Đăng xuất" onclick="logout()"><i class="fa-solid fa-right-from-bracket"></i></button>
+      </div>
+    </aside>
+
+    <!-- KHU VỰC NỘI DUNG CHÍNH (MAIN VIEWPORT) -->
+    <main class="main-viewport">
+      <!-- Top header bar chung -->
+      <div class="top-bar">
+        <div class="top-bar-title">
+          <h1 id="pageTitle">Thống kê vận hành</h1>
+          <p id="pageSubtitle">Tổng hợp tình hình doanh thu và hiệu suất lấp sân hôm nay</p>
+        </div>
+        <div class="top-bar-actions" id="topActions">
+          <button class="btn" onclick="refreshData()"><i class="fa-solid fa-rotate"></i> Làm mới</button>
+          <button class="btn btn-primary" onclick="openQuickBookingModal()"><i class="fa-solid fa-plus"></i> Đặt sân tại chỗ</button>
+          <button class="btn" onclick="openLockSlotModal()"><i class="fa-solid fa-lock"></i> Khóa khung giờ</button>
+        </div>
+      </div>
+
+      <!-- =========================================================================
+           VIEW 1: THỐNG KÊ (PDF TRANG 3)
+           ========================================================================= -->
+      <section id="view-stats" class="portal-view">
+        <!-- 5 Stat Cards -->
+        <div class="stats-row">
+          <div class="stat-card">
+            <div class="label">DOANH THU HÔM NAY</div>
+            <div class="value" style="color:var(--primary);">2.850.000 đ</div>
+            <div class="sub positive"><i class="fa-solid fa-arrow-trend-up"></i> +18% so với hôm qua</div>
+          </div>
+          <div class="stat-card">
+            <div class="label">ĐƠN ĐẶT HÔM NAY</div>
+            <div class="value">14 <span style="font-size:14px; font-weight:600; color:var(--muted);">đơn</span></div>
+            <div class="sub" style="color:var(--orange); font-weight:600;">3 đơn chờ xác nhận</div>
+          </div>
+          <div class="stat-card">
+            <div class="label">TỶ LỆ LẤP SÂN</div>
+            <div class="value" style="color:var(--green);">78%</div>
+            <div class="sub positive">Giờ vàng (17h-21h): 95%</div>
+          </div>
+          <div class="stat-card">
+            <div class="label">GIỜ ĐÃ BÁN</div>
+            <div class="value">32 / 48 <span style="font-size:13px; font-weight:500; color:var(--muted);">giờ</span></div>
+            <div class="sub">Tổng công suất 6 sân</div>
+          </div>
+          <div class="stat-card">
+            <div class="label">YÊU CẦU HUỶ</div>
+            <div class="value" style="color:var(--danger);">2 <span style="font-size:14px; font-weight:600; color:var(--muted);">đơn</span></div>
+            <div class="sub" style="color:var(--danger); font-weight:600;">Cần xem xét xử lý</div>
+          </div>
+        </div>
+
+        <div class="two-cols">
+          <!-- Cột trái: Biểu đồ doanh thu 7 ngày -->
+          <div class="card-box">
+            <div class="card-box-header">
+              <div>
+                <div class="card-box-title">Doanh thu theo ngày (7 ngày gần nhất)</div>
+                <div class="card-box-sub">Đơn vị: Nghìn đồng (VNĐ)</div>
+              </div>
+              <span class="status-pill confirmed"><i class="fa-solid fa-calendar-check"></i> Tuần này: 19.850.000 đ</span>
+            </div>
+            <div class="bar-chart">
+              <div class="bar-col">
+                <div class="bar" style="height: 55%;"><span class="bar-val">2.200k</span></div>
+                <span class="bar-label">T2</span>
+              </div>
+              <div class="bar-col">
+                <div class="bar" style="height: 65%;"><span class="bar-val">2.600k</span></div>
+                <span class="bar-label">T3</span>
+              </div>
+              <div class="bar-col">
+                <div class="bar" style="height: 48%;"><span class="bar-val">1.950k</span></div>
+                <span class="bar-label">T4</span>
+              </div>
+              <div class="bar-col">
+                <div class="bar" style="height: 70%;"><span class="bar-val">2.800k</span></div>
+                <span class="bar-label">T5</span>
+              </div>
+              <div class="bar-col">
+                <div class="bar" style="height: 85%;"><span class="bar-val">3.400k</span></div>
+                <span class="bar-label">T6</span>
+              </div>
+              <div class="bar-col">
+                <div class="bar" style="height: 98%; background:var(--green);"><span class="bar-val">3.950k</span></div>
+                <span class="bar-label">T7</span>
+              </div>
+              <div class="bar-col">
+                <div class="bar" style="height: 72%;"><span class="bar-val">2.850k</span></div>
+                <span class="bar-label">CN</span>
+              </div>
+            </div>
+          </div>
+
+          <!-- Cột phải: Giờ đã bán theo từng sân -->
+          <div class="card-box">
+            <div class="card-box-header">
+              <div class="card-box-title">Hiệu suất theo từng sân</div>
+              <div class="card-box-sub">Tỷ lệ lấp giờ</div>
+            </div>
+            <div class="court-progress-list">
+              <div class="court-prog-item">
+                <div class="court-prog-head"><span>Sân Cầu lông 1</span><span style="color:var(--primary);">85% (6.8h)</span></div>
+                <div class="court-prog-bar"><div class="court-prog-fill" style="width:85%;"></div></div>
+              </div>
+              <div class="court-prog-item">
+                <div class="court-prog-head"><span>Sân Cầu lông 2</span><span style="color:var(--primary);">78% (6.2h)</span></div>
+                <div class="court-prog-bar"><div class="court-prog-fill" style="width:78%;"></div></div>
+              </div>
+              <div class="court-prog-item">
+                <div class="court-prog-head"><span>Sân Cầu lông 3</span><span style="color:var(--primary);">72% (5.7h)</span></div>
+                <div class="court-prog-bar"><div class="court-prog-fill" style="width:72%;"></div></div>
+              </div>
+              <div class="court-prog-item">
+                <div class="court-prog-head"><span>Sân Cầu lông 4</span><span style="color:var(--primary);">90% (7.2h)</span></div>
+                <div class="court-prog-bar"><div class="court-prog-fill" style="width:90%;"></div></div>
+              </div>
+              <div class="court-prog-item">
+                <div class="court-prog-head"><span>Sân Pickleball 1</span><span style="color:var(--green);">95% (7.6h)</span></div>
+                <div class="court-prog-bar"><div class="court-prog-fill" style="width:95%; background:var(--green);"></div></div>
+              </div>
+              <div class="court-prog-item">
+                <div class="court-prog-head"><span>Sân Pickleball 2</span><span style="color:var(--orange);">60% (4.8h)</span></div>
+                <div class="court-prog-bar"><div class="court-prog-fill" style="width:60%; background:var(--orange);"></div></div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Heatmap tỷ lệ lấp sân theo khung giờ -->
+        <div class="card-box">
+          <div class="card-box-header">
+            <div>
+              <div class="card-box-title">Mật độ lấp sân theo khung giờ trong tuần (Heatmap)</div>
+              <div class="card-box-sub">Giúp tối ưu bảng giá giờ vàng và giờ thường</div>
+            </div>
+            <div style="display:flex; gap:12px; font-size:11.5px; align-items:center;">
+              <span><span class="heatmap-cell hm-0" style="padding:2px 8px;">Trống</span> 0-30%</span>
+              <span><span class="heatmap-cell hm-2" style="padding:2px 8px;">Bình thường</span> 30-70%</span>
+              <span><span class="heatmap-cell hm-4" style="padding:2px 8px; color:#fff;">Đầy sân</span> &gt;85%</span>
+            </div>
+          </div>
+          <div class="heatmap-grid" id="heatmapContainer">
+            <!-- Heatmap sẽ được render bởi JS -->
+          </div>
+        </div>
+      </section>
+
+      <!-- =========================================================================
+           VIEW 2: LỊCH SÂN (PDF TRANG 4)
+           ========================================================================= -->
+      <section id="view-schedule" class="portal-view" style="display:none;">
+        <div class="filter-bar">
+          <div style="display:flex; align-items:center; gap:8px;">
+            <label style="font-weight:600; font-size:12.5px;">Chọn ngày:</label>
+            <input type="date" id="scheduleDateInput" class="btn" value="2026-10-15" onchange="renderSchedule()">
+            <button class="btn" onclick="setScheduleToday()">Hôm nay</button>
+          </div>
+          <div style="display:flex; gap:6px;">
+            <button class="btn btn-pill active" onclick="filterScheduleCourt('all', this)">Tất cả sân (6)</button>
+            <button class="btn btn-pill" onclick="filterScheduleCourt('badminton', this)">Cầu lông (4)</button>
+            <button class="btn btn-pill" onclick="filterScheduleCourt('pickleball', this)">Pickleball (2)</button>
+          </div>
+          <div style="margin-left:auto; display:flex; gap:10px; font-size:12px; align-items:center;">
+            <span style="display:flex; align-items:center; gap:5px;"><span style="width:10px; height:10px; border-radius:2px; background:var(--green);"></span> Đã xác nhận</span>
+            <span style="display:flex; align-items:center; gap:5px;"><span style="width:10px; height:10px; border-radius:2px; background:var(--primary);"></span> Chờ duyệt</span>
+            <span style="display:flex; align-items:center; gap:5px;"><span style="width:10px; height:10px; border-radius:2px; background:#94a3b8;"></span> Đã xong</span>
+            <span style="display:flex; align-items:center; gap:5px;"><span style="width:10px; height:10px; border-radius:2px; background:#cbd5e1; border:1px dashed #64748b;"></span> Khóa</span>
+          </div>
+        </div>
+
+        <!-- Lưới lịch 6 sân từ 06:00 đến 22:00 -->
+        <div class="schedule-grid-wrap">
+          <div class="schedule-grid" id="scheduleGrid">
+            <!-- Render bởi JS -->
+          </div>
+        </div>
+      </section>
+
+      <!-- =========================================================================
+           VIEW 3: ĐƠN ĐẶT (PDF TRANG 5)
+           ========================================================================= -->
+      <section id="view-bookings" class="portal-view" style="display:none;">
+        <!-- 4 Stat Filter Cards -->
+        <div class="stats-row" style="grid-template-columns: repeat(4, 1fr);">
+          <div class="stat-card active-card" style="cursor:pointer;" onclick="filterBookingsTab('all', this)">
+            <div class="label">TẤT CẢ ĐƠN</div>
+            <div class="value" id="countAllBookings">48</div>
+            <div class="sub">Toàn bộ danh sách</div>
+          </div>
+          <div class="stat-card" style="cursor:pointer;" onclick="filterBookingsTab('pending', this)">
+            <div class="label">CHỜ XÁC NHẬN</div>
+            <div class="value" style="color:var(--orange);" id="countPendingBookings">3</div>
+            <div class="sub">Cần chủ sân duyệt ca</div>
+          </div>
+          <div class="stat-card" style="cursor:pointer;" onclick="filterBookingsTab('confirmed', this)">
+            <div class="label">ĐÃ XÁC NHẬN</div>
+            <div class="value" style="color:var(--green);" id="countConfirmedBookings">38</div>
+            <div class="sub">Khách đã nhận lịch</div>
+          </div>
+          <div class="stat-card" style="cursor:pointer;" onclick="filterBookingsTab('cancelled', this)">
+            <div class="label">ĐÃ HUỶ</div>
+            <div class="value" style="color:var(--danger);" id="countCancelledBookings">7</div>
+            <div class="sub">Đã xử lý hoàn / huỷ</div>
+          </div>
+        </div>
+
+        <div class="filter-bar">
+          <div class="search-input-wrap">
+            <i class="fa-solid fa-magnifying-glass search-icon"></i>
+            <input type="text" id="bookingSearchInput" placeholder="Tìm theo mã đơn, tên khách, số điện thoại..." oninput="onSearchBookings()">
+          </div>
+          <select class="btn" id="filterCourtType" onchange="onSearchBookings()">
+            <option value="">Tất cả loại sân</option>
+            <option value="Cầu lông">Cầu lông</option>
+            <option value="Pickleball">Pickleball</option>
+          </select>
+          <select class="btn" id="filterPaymentStatus" onchange="onSearchBookings()">
+            <option value="">Tất cả thanh toán</option>
+            <option value="paid">Đã thanh toán (VietQR)</option>
+            <option value="unpaid">Thanh toán tại sân</option>
+          </select>
+        </div>
+
+        <div class="table-responsive">
+          <table class="anta-table">
+            <thead>
+              <tr>
+                <th>Mã đơn</th>
+                <th>Khách hàng</th>
+                <th>Sân & Khung giờ</th>
+                <th>Dịch vụ đi kèm</th>
+                <th>Tổng tiền</th>
+                <th>Thanh toán</th>
+                <th>Trạng thái</th>
+                <th style="text-align:right;">Thao tác</th>
+              </tr>
+            </thead>
+            <tbody id="bookingsTableBody">
+              <!-- Render động -->
+            </tbody>
+          </table>
+        </div>
+      </section>
+
+      <!-- =========================================================================
+           VIEW 4: CHI TIẾT ĐƠN ĐẶT (PDF TRANG 6)
+           ========================================================================= -->
+      <section id="view-booking-detail" class="portal-view" style="display:none;">
+        <div style="margin-bottom:16px;">
+          <button class="btn" onclick="switchView('bookings')"><i class="fa-solid fa-arrow-left"></i> Quay lại danh sách đơn đặt</button>
+        </div>
+
+        <div class="two-cols">
+          <!-- Cột trái: Thông tin đơn & Khách hàng & Dịch vụ -->
+          <div>
+            <!-- Block 1: Thông tin sân -->
+            <div class="card-box">
+              <div class="card-box-header">
+                <div>
+                  <div class="card-box-title">Thông tin đặt sân: <span id="dtlOrderId" style="color:var(--primary);">AN-1510-0142</span></div>
+                  <div class="card-box-sub" id="dtlCreatedAt">Đặt lúc: 14:10 - 15/10/2026</div>
+                </div>
+                <span class="status-pill pending-confirm" id="dtlStatusBadge">Chờ chủ sân xác nhận</span>
+              </div>
+              <div style="display:grid; grid-template-columns:1fr 1fr; gap:12px; font-size:13px;">
+                <div><strong>Cơ sở:</strong> Anta Arena Thủ Đức</div>
+                <div><strong>Sân:</strong> <span id="dtlCourtName">Sân Cầu lông 2 (Thảm Yonex)</span></div>
+                <div><strong>Ngày đặt:</strong> <span id="dtlDate">15/10/2026</span></div>
+                <div><strong>Khung giờ:</strong> <span id="dtlTimeSlot">17:00 - 19:00 (2.0 giờ)</span></div>
+                <div style="grid-column: span 2; background:#f8fafc; padding:10px; border-radius:6px; border:1px dashed var(--line);">
+                  <strong>Ghi chú của khách:</strong> <span id="dtlCustomerNote">Khách xin chuẩn bị trước 1 rổ cầu để khởi động và cắm sạc điện thoại gần sân.</span>
+                </div>
+              </div>
+            </div>
+
+            <!-- Block 2: Khách hàng -->
+            <div class="card-box">
+              <div class="card-box-title" style="margin-bottom:12px;"><i class="fa-solid fa-user"></i> Thông tin khách hàng</div>
+              <div style="display:grid; grid-template-columns:1fr 1fr; gap:12px; font-size:13px;">
+                <div><strong>Họ và tên:</strong> <span id="dtlCustomerName">Lê Hoàng Long</span></div>
+                <div><strong>Số điện thoại:</strong> <span id="dtlCustomerPhone">0903 888 999</span></div>
+                <div><strong>Email:</strong> <span id="dtlCustomerEmail">long.le@gmail.com</span></div>
+                <div><strong>Hạng thành viên:</strong> <span class="status-pill confirmed"><i class="fa-solid fa-crown"></i> Gold (14 lượt đặt)</span></div>
+              </div>
+            </div>
+
+            <!-- Block 3: Dịch vụ & Thanh toán -->
+            <div class="card-box">
+              <div class="card-box-title" style="margin-bottom:12px;"><i class="fa-solid fa-receipt"></i> Dịch vụ & Chi tiết thanh toán</div>
+              <table class="anta-table" style="margin-bottom:14px;">
+                <thead>
+                  <tr>
+                    <th>Hạng mục</th>
+                    <th>SL</th>
+                    <th>Đơn giá</th>
+                    <th style="text-align:right;">Thành tiền</th>
+                  </tr>
+                </thead>
+                <tbody id="dtlItemsTbody">
+                  <tr>
+                    <td>Tiền thuê sân (2.0 giờ)</td>
+                    <td>1</td>
+                    <td>200.000 đ</td>
+                    <td style="text-align:right;">200.000 đ</td>
+                  </tr>
+                  <tr>
+                    <td>Nước khoáng bù điện giải Pocari</td>
+                    <td>2</td>
+                    <td>20.000 đ</td>
+                    <td style="text-align:right;">40.000 đ</td>
+                  </tr>
+                  <tr>
+                    <td>Thuê vợt Yonex Astrox</td>
+                    <td>2</td>
+                    <td>30.000 đ</td>
+                    <td style="text-align:right;">60.000 đ</td>
+                  </tr>
+                </tbody>
+              </table>
+              <div style="display:flex; justify-content:space-between; align-items:center; padding-top:10px; border-top:1px solid var(--line);">
+                <div>
+                  <span class="status-pill confirmed"><i class="fa-solid fa-check"></i> Đã thanh toán qua VietQR</span>
+                  <div style="font-size:11.5px; color:var(--muted); margin-top:4px;">Mã GD ngân hàng: VQR992834012</div>
+                </div>
+                <div style="text-align:right;">
+                  <div style="font-size:12px; color:var(--muted);">TỔNG CỘNG</div>
+                  <div style="font-size:22px; font-weight:800; color:var(--primary);" id="dtlTotalPrice">300.000 đ</div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Cột phải: Thao tác & Timeline lịch sử -->
+          <div>
+            <div class="card-box">
+              <div class="card-box-title" style="margin-bottom:12px;">Hành động duyệt đơn</div>
+              <div style="display:flex; flex-direction:column; gap:8px;">
+                <button class="btn btn-green" style="width:100%; justify-content:center; padding:10px;" onclick="confirmCurrentOrder()">
+                  <i class="fa-solid fa-check-circle"></i> Xác nhận nhận ca đặt này
+                </button>
+                <button class="btn btn-danger" style="width:100%; justify-content:center; padding:10px;" onclick="rejectCurrentOrder()">
+                  <i class="fa-solid fa-ban"></i> Từ chối đơn (Hoàn tiền cho khách)
+                </button>
+                <button class="btn" style="width:100%; justify-content:center; padding:10px;" onclick="window.print()">
+                  <i class="fa-solid fa-print"></i> In phiếu nhận sân
+                </button>
+              </div>
+            </div>
+
+            <div class="card-box">
+              <div class="card-box-title" style="margin-bottom:16px;"><i class="fa-solid fa-timeline"></i> Nhật ký tiến trình</div>
+              <div class="timeline">
+                <div class="timeline-item">
+                  <div class="timeline-dot done"></div>
+                  <div class="timeline-time">14:10 - Hôm nay</div>
+                  <div class="timeline-desc">Khách hàng tạo đơn trên Anta App</div>
+                </div>
+                <div class="timeline-item">
+                  <div class="timeline-dot done"></div>
+                  <div class="timeline-time">14:11 - Hôm nay</div>
+                  <div class="timeline-desc">Thanh toán VietQR thành công 300.000 đ</div>
+                </div>
+                <div class="timeline-item">
+                  <div class="timeline-dot"></div>
+                  <div class="timeline-time">14:12 - Hôm nay</div>
+                  <div class="timeline-desc">Hệ thống gửi thông báo chờ chủ sân tiếp nhận</div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- =========================================================================
+           VIEW 5: YÊU CẦU HUỶ (PDF TRANG 7)
+           ========================================================================= -->
+      <section id="view-cancellations" class="portal-view" style="display:none;">
+        <div class="tab-nav">
+          <button class="tab-nav-btn active" onclick="switchCancelTab('pending', this)">Chờ xử lý (2 đơn)</button>
+          <button class="tab-nav-btn" onclick="switchCancelTab('processed', this)">Đã xử lý (12 đơn)</button>
+        </div>
+
+        <div class="table-responsive">
+          <table class="anta-table">
+            <thead>
+              <tr>
+                <th>Mã đơn</th>
+                <th>Khách hàng</th>
+                <th>Sân & Giờ</th>
+                <th>Lý do huỷ từ khách</th>
+                <th>Tiền đã đóng</th>
+                <th>Thời điểm huỷ</th>
+                <th style="text-align:right;">Thao tác</th>
+              </tr>
+            </thead>
+            <tbody id="cancelTableBody">
+              <!-- Render động -->
+            </tbody>
+          </table>
+        </div>
+      </section>
+
+      <!-- =========================================================================
+           VIEW 6: SÂN VÀ GIÁ (PDF TRANG 8)
+           ========================================================================= -->
+      <section id="view-courts" class="portal-view" style="display:none;">
+        <div class="two-cols">
+          <!-- Cột trái: Thông tin cơ sở -->
+          <div class="card-box">
+            <div class="card-box-title" style="margin-bottom:14px;"><i class="fa-solid fa-building"></i> Hồ sơ cơ sở</div>
+            <div style="display:flex; flex-direction:column; gap:12px; font-size:13px;">
+              <div>
+                <label style="color:var(--muted); font-size:11px; font-weight:700;">TÊN CƠ SỞ</label>
+                <div style="font-weight:700; font-size:15px; color:var(--text);">Anta Arena Thủ Đức</div>
+              </div>
+              <div>
+                <label style="color:var(--muted); font-size:11px; font-weight:700;">ĐỊA CHỈ</label>
+                <div>12 Đường Số 8, Phường Linh Trung, TP. Thủ Đức, TP. Hồ Chí Minh</div>
+              </div>
+              <div>
+                <label style="color:var(--muted); font-size:11px; font-weight:700;">HOTLINE LIÊN HỆ</label>
+                <div>0988 123 456 - 028 3899 9999</div>
+              </div>
+              <div>
+                <label style="color:var(--muted); font-size:11px; font-weight:700;">GIỜ HOẠT ĐỘNG</label>
+                <div>06:00 - 23:00 (Mở cửa tất cả các ngày trong tuần)</div>
+              </div>
+              <div>
+                <label style="color:var(--muted); font-size:11px; font-weight:700;">TIỆN ÍCH CÓ SẴN</label>
+                <div style="display:flex; flex-wrap:wrap; gap:6px; margin-top:4px;">
+                  <span class="status-pill confirmed">Wifi tốc độ cao</span>
+                  <span class="status-pill confirmed">Bãi đỗ ô tô & xe máy</span>
+                  <span class="status-pill confirmed">Phòng tắm nước nóng</span>
+                  <span class="status-pill confirmed">Căn tin giải khát</span>
+                  <span class="status-pill confirmed">Cho thuê vợt / bóng</span>
+                </div>
+              </div>
+              <button class="btn btn-primary" style="margin-top:10px;"><i class="fa-solid fa-pen-to-square"></i> Cập nhật thông tin cơ sở</button>
+            </div>
+          </div>
+
+          <!-- Cột phải: Danh sách sân & Khung giá theo giờ -->
+          <div>
+            <div class="card-box">
+              <div class="card-box-header">
+                <div>
+                  <div class="card-box-title">Danh sách các sân con (6 sân)</div>
+                  <div class="card-box-sub">4 sân Cầu lông & 2 sân Pickleball tiêu chuẩn</div>
+                </div>
+                <button class="btn btn-primary" onclick="alert('Mở form thêm sân con mới')"><i class="fa-solid fa-plus"></i> Thêm sân</button>
+              </div>
+              <div class="table-responsive">
+                <table class="anta-table">
+                  <thead>
+                    <tr>
+                      <th>Tên sân</th>
+                      <th>Loại sân</th>
+                      <th>Mặt sân</th>
+                      <th>Trạng thái</th>
+                      <th style="text-align:right;">Thao tác</th>
+                    </tr>
+                  </thead>
+                  <tbody id="courtListTbody">
+                    <tr>
+                      <td><strong>Sân Cầu lông 1</strong></td>
+                      <td>Cầu lông</td>
+                      <td>Thảm Yonex thi đấu</td>
+                      <td><span class="status-pill confirmed">Đang hoạt động</span></td>
+                      <td style="text-align:right;"><button class="btn" onclick="toggleCourtState(this)">Tạm dừng</button></td>
+                    </tr>
+                    <tr>
+                      <td><strong>Sân Cầu lông 2</strong></td>
+                      <td>Cầu lông</td>
+                      <td>Thảm Yonex thi đấu</td>
+                      <td><span class="status-pill confirmed">Đang hoạt động</span></td>
+                      <td style="text-align:right;"><button class="btn" onclick="toggleCourtState(this)">Tạm dừng</button></td>
+                    </tr>
+                    <tr>
+                      <td><strong>Sân Cầu lông 3</strong></td>
+                      <td>Cầu lông</td>
+                      <td>Thảm Yonex thi đấu</td>
+                      <td><span class="status-pill confirmed">Đang hoạt động</span></td>
+                      <td style="text-align:right;"><button class="btn" onclick="toggleCourtState(this)">Tạm dừng</button></td>
+                    </tr>
+                    <tr>
+                      <td><strong>Sân Cầu lông 4</strong></td>
+                      <td>Cầu lông</td>
+                      <td>Sàn gỗ chuyên dụng</td>
+                      <td><span class="status-pill confirmed">Đang hoạt động</span></td>
+                      <td style="text-align:right;"><button class="btn" onclick="toggleCourtState(this)">Tạm dừng</button></td>
+                    </tr>
+                    <tr>
+                      <td><strong>Sân Pickleball 1</strong></td>
+                      <td>Pickleball</td>
+                      <td>Sơn Acrylic 8 lớp chống trượt</td>
+                      <td><span class="status-pill confirmed">Đang hoạt động</span></td>
+                      <td style="text-align:right;"><button class="btn" onclick="toggleCourtState(this)">Tạm dừng</button></td>
+                    </tr>
+                    <tr>
+                      <td><strong>Sân Pickleball 2</strong></td>
+                      <td>Pickleball</td>
+                      <td>Sơn Acrylic 8 lớp chống trượt</td>
+                      <td><span class="status-pill confirmed">Đang hoạt động</span></td>
+                      <td style="text-align:right;"><button class="btn" onclick="toggleCourtState(this)">Tạm dừng</button></td>
+                    </tr>
+                  </tbody>
+                </table>
+              </div>
+            </div>
+
+            <!-- Khung giờ và bảng giá -->
+            <div class="card-box">
+              <div class="card-box-header">
+                <div>
+                  <div class="card-box-title">Bảng giá theo khung giờ</div>
+                  <div class="card-box-sub">Tự động áp dụng khi khách đặt qua ứng dụng</div>
+                </div>
+                <button class="btn" onclick="alert('Đã cập nhật bảng giá thành công!')"><i class="fa-solid fa-floppy-disk"></i> Lưu bảng giá</button>
+              </div>
+              <div class="table-responsive">
+                <table class="anta-table">
+                  <thead>
+                    <tr>
+                      <th>Khung giờ</th>
+                      <th>Cầu lông (Ngày thường)</th>
+                      <th>Cầu lông (Cuối tuần)</th>
+                      <th>Pickleball (Ngày thường)</th>
+                      <th>Pickleball (Cuối tuần)</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    <tr>
+                      <td><strong>06:00 - 16:00 (Giờ thường)</strong></td>
+                      <td>80.000 đ/h</td>
+                      <td>100.000 đ/h</td>
+                      <td>120.000 đ/h</td>
+                      <td>140.000 đ/h</td>
+                    </tr>
+                    <tr>
+                      <td><strong>16:00 - 22:00 (Giờ vàng)</strong></td>
+                      <td style="color:var(--orange); font-weight:700;">130.000 đ/h</td>
+                      <td style="color:var(--orange); font-weight:700;">150.000 đ/h</td>
+                      <td style="color:var(--orange); font-weight:700;">160.000 đ/h</td>
+                      <td style="color:var(--orange); font-weight:700;">180.000 đ/h</td>
+                    </tr>
+                    <tr>
+                      <td><strong>22:00 - 23:00 (Giờ khuya)</strong></td>
+                      <td>90.000 đ/h</td>
+                      <td>100.000 đ/h</td>
+                      <td>130.000 đ/h</td>
+                      <td>140.000 đ/h</td>
+                    </tr>
+                  </tbody>
+                </table>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- =========================================================================
+           VIEW 7: DỊCH VỤ & KHO (PDF TRANG 9)
+           ========================================================================= -->
+      <section id="view-services" class="portal-view" style="display:none;">
+        <div class="two-cols">
+          <!-- Bảng dịch vụ bên trái -->
+          <div class="card-box">
+            <div class="card-box-header">
+              <div>
+                <div class="card-box-title">Danh mục dịch vụ & Vật phẩm bán lẻ tại quầy</div>
+                <div class="card-box-sub">Tự động trừ tồn kho khi gán vào đơn đặt sân</div>
+              </div>
+            </div>
+            <div class="table-responsive">
+              <table class="anta-table">
+                <thead>
+                  <tr>
+                    <th>Tên sản phẩm / Dịch vụ</th>
+                    <th>Phân loại</th>
+                    <th>Đơn giá</th>
+                    <th>Tồn kho</th>
+                    <th style="text-align:right;">Thao tác</th>
+                  </tr>
+                </thead>
+                <tbody id="servicesTableBody">
+                  <tr>
+                    <td><strong>Nước suối Aquafina 500ml</strong></td>
+                    <td><span class="status-pill pending-confirm">Nước uống</span></td>
+                    <td>10.000 đ</td>
+                    <td><strong>85</strong> chai</td>
+                    <td style="text-align:right;"><button class="btn" onclick="quickEditStock(this)">+ Nhập kho</button></td>
+                  </tr>
+                  <tr>
+                    <td><strong>Nước bù khoáng Pocari Sweat 500ml</strong></td>
+                    <td><span class="status-pill pending-confirm">Nước uống</span></td>
+                    <td>20.000 đ</td>
+                    <td><strong>42</strong> chai</td>
+                    <td style="text-align:right;"><button class="btn" onclick="quickEditStock(this)">+ Nhập kho</button></td>
+                  </tr>
+                  <tr>
+                    <td><strong>Thuê vợt Yonex Astrox</strong></td>
+                    <td><span class="status-pill confirmed">Thuê dụng cụ</span></td>
+                    <td>30.000 đ/giờ</td>
+                    <td><strong>12</strong> cây</td>
+                    <td style="text-align:right;"><button class="btn" onclick="quickEditStock(this)">+ Nhập kho</button></td>
+                  </tr>
+                  <tr>
+                    <td><strong>Hộp 3 quả bóng Pickleball Franklin X-40</strong></td>
+                    <td><span class="status-pill confirmed">Thuê / Mua</span></td>
+                    <td>35.000 đ</td>
+                    <td><strong>20</strong> hộp</td>
+                    <td style="text-align:right;"><button class="btn" onclick="quickEditStock(this)">+ Nhập kho</button></td>
+                  </tr>
+                  <tr>
+                    <td><strong>Cuốn cán vợt Yonex / VS</strong></td>
+                    <td><span class="status-pill">Phụ kiện</span></td>
+                    <td>15.000 đ</td>
+                    <td><strong>50</strong> cái</td>
+                    <td style="text-align:right;"><button class="btn" onclick="quickEditStock(this)">+ Nhập kho</button></td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+          </div>
+
+          <!-- Form thêm dịch vụ bên phải -->
+          <div class="card-box">
+            <div class="card-box-title" style="margin-bottom:14px;"><i class="fa-solid fa-plus-circle"></i> Thêm vật phẩm / dịch vụ mới</div>
+            <form onsubmit="handleCreateService(event)" style="display:flex; flex-direction:column; gap:12px; font-size:13px;">
+              <div>
+                <label style="font-weight:600; display:block; margin-bottom:4px;">Tên dịch vụ / vật phẩm:</label>
+                <input type="text" id="newSvcName" class="btn" style="width:100%; text-align:left;" placeholder="Ví dụ: Nước tăng lực Redbull" required>
+              </div>
+              <div>
+                <label style="font-weight:600; display:block; margin-bottom:4px;">Phân loại:</label>
+                <select id="newSvcCat" class="btn" style="width:100%;">
+                  <option value="Nước uống">Nước giải khát</option>
+                  <option value="Thuê dụng cụ">Thuê vợt / bóng</option>
+                  <option value="Phụ kiện">Phụ kiện thi đấu</option>
+                  <option value="Khác">Khác</option>
+                </select>
+              </div>
+              <div>
+                <label style="font-weight:600; display:block; margin-bottom:4px;">Đơn giá (VNĐ):</label>
+                <input type="number" id="newSvcPrice" class="btn" style="width:100%; text-align:left;" placeholder="15000" required>
+              </div>
+              <div>
+                <label style="font-weight:600; display:block; margin-bottom:4px;">Số lượng tồn kho ban đầu:</label>
+                <input type="number" id="newSvcStock" class="btn" style="width:100%; text-align:left;" placeholder="30" required>
+              </div>
+              <button type="submit" class="btn btn-primary" style="justify-content:center; padding:10px; margin-top:6px;">
+                <i class="fa-solid fa-floppy-disk"></i> Lưu vào danh mục
+              </button>
+            </form>
+          </div>
+        </div>
+      </section>
+
+      <!-- =========================================================================
+           VIEW 8: THU CHI TẠI SÂN (PDF TRANG 10)
+           ========================================================================= -->
+      <section id="view-cashflow" class="portal-view" style="display:none;">
+        <div class="stats-row" style="grid-template-columns: repeat(4, 1fr);">
+          <div class="stat-card">
+            <div class="label">TỔNG THU THÁNG NÀY</div>
+            <div class="value" style="color:var(--primary);">42.600.000 đ</div>
+            <div class="sub positive"><i class="fa-solid fa-arrow-trend-up"></i> +12% so với tháng trước</div>
+          </div>
+          <div class="stat-card">
+            <div class="label">THU QUA APP (VIETQR)</div>
+            <div class="value" style="color:var(--green);">34.200.000 đ</div>
+            <div class="sub">Chiếm 80.2% tổng thu</div>
+          </div>
+          <div class="stat-card">
+            <div class="label">THU TIỀN MẶT TẠI QUẦY</div>
+            <div class="value" style="color:var(--orange);">8.400.000 đ</div>
+            <div class="sub">Tiền đặt tại chỗ & dịch vụ</div>
+          </div>
+          <div class="stat-card">
+            <div class="label">CHI PHÍ VẬN HÀNH</div>
+            <div class="value" style="color:var(--danger);">6.800.000 đ</div>
+            <div class="sub">Điện, nước, mua cầu & dọn dẹp</div>
+          </div>
+        </div>
+
+        <div class="two-cols">
+          <!-- Bảng giao dịch bên trái -->
+          <div class="card-box">
+            <div class="card-box-header">
+              <div>
+                <div class="card-box-title">Sổ nhật ký thu - chi tiền mặt & trực tuyến</div>
+                <div class="card-box-sub">Minh bạch dòng tiền vận hành tại cơ sở</div>
+              </div>
+            </div>
+            <div class="table-responsive">
+              <table class="anta-table">
+                <thead>
+                  <tr>
+                    <th>Thời gian</th>
+                    <th>Nội dung khoản thu / chi</th>
+                    <th>Hình thức</th>
+                    <th>Số tiền</th>
+                    <th>Người lập</th>
+                  </tr>
+                </thead>
+                <tbody id="cashflowTableBody">
+                  <tr>
+                    <td>14:10 - 15/10</td>
+                    <td>Thu tiền sân đơn AN-1510-0142</td>
+                    <td><span class="status-pill confirmed">VietQR</span></td>
+                    <td style="color:var(--green); font-weight:700;">+300.000 đ</td>
+                    <td>Khách thanh toán App</td>
+                  </tr>
+                  <tr>
+                    <td>13:40 - 15/10</td>
+                    <td>Thu tiền sân đơn AN-1510-0141</td>
+                    <td><span class="status-pill confirmed">VietQR</span></td>
+                    <td style="color:var(--green); font-weight:700;">+240.000 đ</td>
+                    <td>Khách thanh toán App</td>
+                  </tr>
+                  <tr>
+                    <td>11:20 - 15/10</td>
+                    <td>Bán lẻ nước & thuê vợt tại quầy</td>
+                    <td><span class="status-pill pending-payment">Tiền mặt</span></td>
+                    <td style="color:var(--green); font-weight:700;">+75.000 đ</td>
+                    <td>Nguyễn Minh Tâm (Chủ sân)</td>
+                  </tr>
+                  <tr>
+                    <td>09:00 - 15/10</td>
+                    <td>Chi mua 5 hộp cầu Thành Công loại 1</td>
+                    <td><span class="status-pill pending-payment">Tiền mặt</span></td>
+                    <td style="color:var(--danger); font-weight:700;">-650.000 đ</td>
+                    <td>Nguyễn Minh Tâm (Chủ sân)</td>
+                  </tr>
+                  <tr>
+                    <td>10/10/2026</td>
+                    <td>Thanh toán tiền điện chiếu sáng tháng 9</td>
+                    <td><span class="status-pill">Chuyển khoản</span></td>
+                    <td style="color:var(--danger); font-weight:700;">-3.200.000 đ</td>
+                    <td>Chủ sân</td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+          </div>
+
+          <!-- Form ghi nhận bên phải -->
+          <div class="card-box">
+            <div class="card-box-title" style="margin-bottom:14px;"><i class="fa-solid fa-pen-nib"></i> Ghi nhận khoản thu / chi ngoài đơn</div>
+            <form onsubmit="handleCreateCashflow(event)" style="display:flex; flex-direction:column; gap:12px; font-size:13px;">
+              <div>
+                <label style="font-weight:600; display:block; margin-bottom:4px;">Loại giao dịch:</label>
+                <select id="cfType" class="btn" style="width:100%;">
+                  <option value="in">Khoản THU (Tiền vào quỹ)</option>
+                  <option value="out">Khoản CHI (Chi phí vận hành)</option>
+                </select>
+              </div>
+              <div>
+                <label style="font-weight:600; display:block; margin-bottom:4px;">Nội dung chi tiết:</label>
+                <input type="text" id="cfNote" class="btn" style="width:100%; text-align:left;" placeholder="Ví dụ: Mua túi rác & nước lau sàn" required>
+              </div>
+              <div>
+                <label style="font-weight:600; display:block; margin-bottom:4px;">Số tiền (VNĐ):</label>
+                <input type="number" id="cfAmount" class="btn" style="width:100%; text-align:left;" placeholder="150000" required>
+              </div>
+              <div>
+                <label style="font-weight:600; display:block; margin-bottom:4px;">Hình thức:</label>
+                <select id="cfMethod" class="btn" style="width:100%;">
+                  <option value="Tiền mặt">Tiền mặt tại quầy</option>
+                  <option value="Chuyển khoản">Chuyển khoản ngân hàng</option>
+                </select>
+              </div>
+              <button type="submit" class="btn btn-primary" style="justify-content:center; padding:10px; margin-top:6px;">
+                <i class="fa-solid fa-check"></i> Lưu vào sổ thu chi
+              </button>
+            </form>
+          </div>
+        </div>
+      </section>
+
+    </main>
+  </div>
+
+  <!-- =========================================================================
+       MODAL 1: TẠO ĐƠN ĐẶT SÂN TẠI CHỖ (CHO KHÁCH VÃNG LAI)
+       ========================================================================= -->
+  <div id="modalQuickBooking" class="modal-backdrop" style="display:none;">
+    <div class="modal-card">
+      <div class="modal-card-header">
+        <h3 style="font-size:16px; font-weight:700;"><i class="fa-solid fa-plus-circle" style="color:var(--primary);"></i> Tạo đơn đặt sân tại chỗ</h3>
+        <button class="btn" style="border:none;" onclick="closeModal('modalQuickBooking')"><i class="fa-solid fa-xmark"></i></button>
+      </div>
+      <div class="modal-card-body">
+        <form id="quickBookingForm" onsubmit="submitQuickBooking(event)" style="display:flex; flex-direction:column; gap:12px; font-size:13px;">
+          <div>
+            <label style="font-weight:600; display:block; margin-bottom:4px;">Tên khách hàng:</label>
+            <input type="text" id="qbCustomerName" class="btn" style="width:100%; text-align:left;" placeholder="Nguyễn Văn A" required>
+          </div>
+          <div>
+            <label style="font-weight:600; display:block; margin-bottom:4px;">Số điện thoại:</label>
+            <input type="text" id="qbCustomerPhone" class="btn" style="width:100%; text-align:left;" placeholder="0901 234 567" required>
+          </div>
+          <div style="display:grid; grid-template-columns:1fr 1fr; gap:10px;">
+            <div>
+              <label style="font-weight:600; display:block; margin-bottom:4px;">Chọn sân:</label>
+              <select id="qbCourtSelect" class="btn" style="width:100%;">
+                <option value="Sân Cầu lông 1">Sân Cầu lông 1</option>
+                <option value="Sân Cầu lông 2">Sân Cầu lông 2</option>
+                <option value="Sân Cầu lông 3">Sân Cầu lông 3</option>
+                <option value="Sân Cầu lông 4">Sân Cầu lông 4</option>
+                <option value="Sân Pickleball 1">Sân Pickleball 1</option>
+                <option value="Sân Pickleball 2">Sân Pickleball 2</option>
+              </select>
+            </div>
+            <div>
+              <label style="font-weight:600; display:block; margin-bottom:4px;">Ngày chơi:</label>
+              <input type="date" id="qbDate" class="btn" style="width:100%;" value="2026-10-15" required>
+            </div>
+          </div>
+          <div style="display:grid; grid-template-columns:1fr 1fr; gap:10px;">
+            <div>
+              <label style="font-weight:600; display:block; margin-bottom:4px;">Khung giờ từ:</label>
+              <select id="qbTimeFrom" class="btn" style="width:100%;" onchange="calculateQuickPrice()">
+                <option value="06:00">06:00</option><option value="07:00">07:00</option><option value="08:00">08:00</option>
+                <option value="14:00">14:00</option><option value="17:00" selected>17:00</option><option value="18:00">18:00</option>
+                <option value="19:00">19:00</option><option value="20:00">20:00</option>
+              </select>
+            </div>
+            <div>
+              <label style="font-weight:600; display:block; margin-bottom:4px;">Đến giờ:</label>
+              <select id="qbTimeTo" class="btn" style="width:100%;" onchange="calculateQuickPrice()">
+                <option value="07:00">07:00</option><option value="08:00">08:00</option><option value="09:00">09:00</option>
+                <option value="16:00">16:00</option><option value="19:00" selected>19:00</option><option value="20:00">20:00</option>
+                <option value="21:00">21:00</option><option value="22:00">22:00</option>
+              </select>
+            </div>
+          </div>
+          <div style="display:flex; justify-content:space-between; align-items:center; background:#f8fafc; padding:12px; border-radius:8px;">
+            <div>
+              <div style="font-size:11px; color:var(--muted); font-weight:700;">TỔNG TIỀN DỰ KIẾN</div>
+              <div style="font-size:20px; font-weight:800; color:var(--primary);" id="qbPricePreview">260.000 đ</div>
+            </div>
+            <select id="qbPaymentType" class="btn">
+              <option value="Tiền mặt tại quầy">Đã thu tiền mặt</option>
+              <option value="VietQR">Quét mã VietQR tại quầy</option>
+            </select>
+          </div>
+          <div class="modal-card-footer" style="padding:10px 0 0 0; background:transparent; border:none;">
+            <button type="button" class="btn" onclick="closeModal('modalQuickBooking')">Huỷ bỏ</button>
+            <button type="submit" class="btn btn-primary"><i class="fa-solid fa-check"></i> Tạo đơn ngay</button>
+          </div>
+        </form>
+      </div>
+    </div>
+  </div>
+
+  <!-- =========================================================================
+       MODAL 2: KHÓA KHUNG GIỜ (BẢO TRÌ HOẶC SỰ KIỆN)
+       ========================================================================= -->
+  <div id="modalLockSlot" class="modal-backdrop" style="display:none;">
+    <div class="modal-card">
+      <div class="modal-card-header">
+        <h3 style="font-size:16px; font-weight:700;"><i class="fa-solid fa-lock" style="color:var(--orange);"></i> Khóa khung giờ sân</h3>
+        <button class="btn" style="border:none;" onclick="closeModal('modalLockSlot')"><i class="fa-solid fa-xmark"></i></button>
+      </div>
+      <div class="modal-card-body">
+        <form onsubmit="submitLockSlot(event)" style="display:flex; flex-direction:column; gap:12px; font-size:13px;">
+          <div>
+            <label style="font-weight:600; display:block; margin-bottom:4px;">Chọn sân muốn khóa:</label>
+            <select id="lockCourtSelect" class="btn" style="width:100%;">
+              <option value="Sân Cầu lông 1">Sân Cầu lông 1</option>
+              <option value="Sân Cầu lông 2">Sân Cầu lông 2</option>
+              <option value="Sân Cầu lông 3">Sân Cầu lông 3</option>
+              <option value="Sân Cầu lông 4">Sân Cầu lông 4</option>
+              <option value="Sân Pickleball 1">Sân Pickleball 1</option>
+              <option value="Sân Pickleball 2">Sân Pickleball 2</option>
+            </select>
+          </div>
+          <div style="display:grid; grid-template-columns:1fr 1fr; gap:10px;">
+            <div>
+              <label style="font-weight:600; display:block; margin-bottom:4px;">Từ giờ:</label>
+              <select id="lockTimeFrom" class="btn" style="width:100%;">
+                <option value="08:00">08:00</option><option value="12:00" selected>12:00</option><option value="14:00">14:00</option>
+              </select>
+            </div>
+            <div>
+              <label style="font-weight:600; display:block; margin-bottom:4px;">Đến giờ:</label>
+              <select id="lockTimeTo" class="btn" style="width:100%;">
+                <option value="14:00" selected>14:00</option><option value="16:00">16:00</option><option value="18:00">18:00</option>
+              </select>
+            </div>
+          </div>
+          <div>
+            <label style="font-weight:600; display:block; margin-bottom:4px;">Lý do khóa sân:</label>
+            <select id="lockReason" class="btn" style="width:100%;">
+              <option value="Bảo trì mặt sân / căng lại lưới">Bảo trì mặt sân / căng lại lưới</option>
+              <option value="Khách thuê cố định tháng">Khách thuê cố định tháng</option>
+              <option value="Tổ chức giải đấu nội bộ">Tổ chức giải đấu nội bộ</option>
+            </select>
+          </div>
+          <div class="modal-card-footer" style="padding:10px 0 0 0; background:transparent; border:none;">
+            <button type="button" class="btn" onclick="closeModal('modalLockSlot')">Huỷ</button>
+            <button type="submit" class="btn btn-primary" style="background:var(--orange); border-color:var(--orange);">
+              <i class="fa-solid fa-lock"></i> Xác nhận khóa
+            </button>
+          </div>
+        </form>
+      </div>
+    </div>
+  </div>
+
+  <!-- =========================================================================
+       MODAL 3: XỬ LÝ YÊU CẦU HUỶ (PDF TRANG 7)
+       ========================================================================= -->
+  <div id="modalRefund" class="modal-backdrop" style="display:none;">
+    <div class="modal-card">
+      <div class="modal-card-header">
+        <h3 style="font-size:16px; font-weight:700;"><i class="fa-solid fa-rotate-left" style="color:var(--danger);"></i> Chấp nhận yêu cầu huỷ đơn?</h3>
+        <button class="btn" style="border:none;" onclick="closeModal('modalRefund')"><i class="fa-solid fa-xmark"></i></button>
+      </div>
+      <div class="modal-card-body" style="font-size:13px;">
+        <div style="background:#f8fafc; padding:12px; border-radius:8px; margin-bottom:14px;">
+          <div><strong>Mã đơn:</strong> <span id="rfOrderId" style="color:var(--primary); font-weight:700;">AN-1510-0130</span></div>
+          <div><strong>Khách hàng:</strong> <span id="rfCustomer">Lê Văn Đức (0912 345 678)</span></div>
+          <div><strong>Số tiền đã trả:</strong> <span id="rfOriginalAmount" style="font-weight:700;">240.000 đ</span></div>
+          <div><strong>Lý do:</strong> <span id="rfReason">Bận đột xuất công tác, xin huỷ trước 4 tiếng</span></div>
+        </div>
+
+        <label style="font-weight:700; margin-bottom:8px; display:block;">Chọn mức hoàn tiền theo chính sách sàn:</label>
+        <div style="display:flex; flex-direction:column; gap:8px; margin-bottom:14px;">
+          <label style="display:flex; align-items:center; gap:8px; padding:8px 12px; border:1px solid var(--line); border-radius:6px; cursor:pointer;">
+            <input type="radio" name="refundOption" value="100" checked onchange="updateRefundAmountPreview(100)">
+            <div><strong>Hoàn 100%</strong> (Huỷ trước ≥ 6 tiếng theo quy định) &mdash; <span style="color:var(--green); font-weight:700;" id="rfP100">240.000 đ</span></div>
+          </label>
+          <label style="display:flex; align-items:center; gap:8px; padding:8px 12px; border:1px solid var(--line); border-radius:6px; cursor:pointer;">
+            <input type="radio" name="refundOption" value="50" onchange="updateRefundAmountPreview(50)">
+            <div><strong>Hoàn 50%</strong> (Huỷ trong khoảng 2 - 6 tiếng) &mdash; <span style="color:var(--orange); font-weight:700;" id="rfP50">120.000 đ</span></div>
+          </label>
+          <label style="display:flex; align-items:center; gap:8px; padding:8px 12px; border:1px solid var(--line); border-radius:6px; cursor:pointer;">
+            <input type="radio" name="refundOption" value="0" onchange="updateRefundAmountPreview(0)">
+            <div><strong>Không hoàn tiền</strong> (Huỷ sát giờ &lt; 2 tiếng) &mdash; 0 đ</div>
+          </label>
+        </div>
+
+        <div>
+          <label style="font-weight:600; display:block; margin-bottom:4px;">Ghi chú gửi thông báo đến khách hàng:</label>
+          <textarea id="rfNote" class="btn" style="width:100%; height:65px; text-align:left; resize:none;" placeholder="Chủ cơ sở đồng ý tiếp nhận huỷ và hoàn tiền qua STK / Ví của bạn."></textarea>
+        </div>
+      </div>
+      <div class="modal-card-footer">
+        <button class="btn" onclick="rejectCancellation()"><i class="fa-solid fa-xmark"></i> Từ chối huỷ</button>
+        <button class="btn btn-danger" onclick="confirmCancellation()"><i class="fa-solid fa-check"></i> Xác nhận hoàn tiền</button>
+      </div>
+    </div>
+  </div>
+
+  <div id="toastMessage" class="toast-msg"><i class="fa-solid fa-circle-check" style="color:var(--green); font-size:16px;"></i> <span id="toastText">Thao tác thành công!</span></div>
+
+  <!-- SCRIPT ĐIỀU KHIỂN GIAO DIỆN CHỦ SÂN -->
+  <script>
+    // Dữ liệu mẫu phong phú và khớp 100% PDF Anta
+    const courtsList = [
+      { id: 'C1', name: 'Sân Cầu lông 1', type: 'badminton', surface: 'Thảm Yonex' },
+      { id: 'C2', name: 'Sân Cầu lông 2', type: 'badminton', surface: 'Thảm Yonex' },
+      { id: 'C3', name: 'Sân Cầu lông 3', type: 'badminton', surface: 'Thảm Yonex' },
+      { id: 'C4', name: 'Sân Cầu lông 4', type: 'badminton', surface: 'Sàn gỗ' },
+      { id: 'P1', name: 'Sân Pickleball 1', type: 'pickleball', surface: 'Sơn Acrylic' },
+      { id: 'P2', name: 'Sân Pickleball 2', type: 'pickleball', surface: 'Sơn Acrylic' }
+    ];
+
+    let bookingsData = [
+      {
+        id: 'AN-1510-0142',
+        customer: 'Lê Hoàng Long',
+        phone: '0903 888 999',
+        court: 'Sân Cầu lông 2',
+        courtType: 'Cầu lông',
+        date: '2026-10-15',
+        time: '17:00 - 19:00',
+        services: '2 Pocari, 2 Vợt Yonex',
+        total: 300000,
+        payment: 'paid',
+        status: 'pending',
+        statusText: 'Chờ xác nhận',
+        note: 'Khách xin chuẩn bị trước 1 rổ cầu để khởi động.'
+      },
+      {
+        id: 'AN-1510-0141',
+        customer: 'Nguyễn Văn Nam',
+        phone: '0918 222 333',
+        court: 'Sân Cầu lông 1',
+        courtType: 'Cầu lông',
+        date: '2026-10-15',
+        time: '18:00 - 20:00',
+        services: '4 Nước suối',
+        total: 240000,
+        payment: 'paid',
+        status: 'confirmed',
+        statusText: 'Đã xác nhận',
+        note: ''
+      },
+      {
+        id: 'AN-1510-0140',
+        customer: 'Trần Minh Quang',
+        phone: '0977 123 456',
+        court: 'Sân Pickleball 1',
+        courtType: 'Pickleball',
+        date: '2026-10-15',
+        time: '19:00 - 21:00',
+        services: 'Hộp bóng 3 quả',
+        total: 355000,
+        payment: 'paid',
+        status: 'confirmed',
+        statusText: 'Đã xác nhận',
+        note: 'Khách yêu cầu hạ lưới chuẩn thi đấu.'
+      },
+      {
+        id: 'AN-1510-0139',
+        customer: 'Phạm Quỳnh Anh',
+        phone: '0945 666 777',
+        court: 'Sân Cầu lông 3',
+        courtType: 'Cầu lông',
+        date: '2026-10-15',
+        time: '08:00 - 10:00',
+        services: 'Không',
+        total: 160000,
+        payment: 'paid',
+        status: 'completed',
+        statusText: 'Đã xong',
+        note: ''
+      },
+      {
+        id: 'AN-1510-0138',
+        customer: 'Đỗ Thành Trung',
+        phone: '0933 999 111',
+        court: 'Sân Cầu lông 4',
+        courtType: 'Cầu lông',
+        date: '2026-10-15',
+        time: '16:00 - 17:00',
+        services: '1 Nước suối',
+        total: 90000,
+        payment: 'paid',
+        status: 'pending',
+        statusText: 'Chờ xác nhận',
+        note: ''
+      },
+      {
+        id: 'AN-1510-0135',
+        customer: 'Hoàng Bách',
+        phone: '0908 777 888',
+        court: 'Sân Pickleball 2',
+        courtType: 'Pickleball',
+        date: '2026-10-15',
+        time: '17:00 - 18:00',
+        services: 'Không',
+        total: 160000,
+        payment: 'paid',
+        status: 'pending',
+        statusText: 'Chờ xác nhận',
+        note: ''
+      }
+    ];
+
+    let cancelRequests = [
+      {
+        id: 'AN-1510-0130',
+        customer: 'Lê Văn Đức',
+        phone: '0912 345 678',
+        court: 'Sân Cầu lông 3',
+        time: '19:00 - 21:00 (Hôm nay)',
+        reason: 'Bận đột xuất công tác, xin huỷ trước 4 tiếng',
+        amount: 240000,
+        cancelTime: '15:00 - 15/10/2026'
+      },
+      {
+        id: 'AN-1510-0125',
+        customer: 'Trần Thị Mai',
+        phone: '0909 555 444',
+        court: 'Sân Pickleball 1',
+        time: '18:00 - 19:00 (Hôm nay)',
+        reason: 'Trời mưa to ngập đường không qua được',
+        amount: 160000,
+        cancelTime: '15:15 - 15/10/2026'
+      }
+    ];
+
+    let currentSelectedOrder = bookingsData[0];
+    let currentCancelActionItem = null;
+
+    // Khởi tạo
+    document.addEventListener('DOMContentLoaded', () => {
+      // Đọc user từ sessionStorage nếu có
+      try {
+        const u = JSON.parse(sessionStorage.getItem('currentUser') || '{}');
+        if (u.hoVaTen) {
+          document.getElementById('ownerNameDisplay').innerText = u.hoVaTen;
+        }
+      } catch (_) {}
+
+      renderHeatmap();
+      renderSchedule();
+      renderBookingsTable(bookingsData);
+      renderCancelTable();
+      updateBadgeCounts();
+
+      // Cố gắng nạp thêm dữ liệu từ backend API nếu máy chủ có sẵn
+      fetchBackendCourts();
+    });
+
+    async function fetchBackendCourts() {
+      try {
+        const res = await fetch('/api/owner/courts');
+        if (res.ok) {
+          const list = await res.json();
+          console.log('[BE] Loaded owner courts:', list);
+        }
+      } catch (_) {}
+    }
+
+    // Chuyển view màn hình
+    function switchView(viewName) {
+      document.querySelectorAll('.portal-view').forEach(el => el.style.display = 'none');
+      document.querySelectorAll('.side-menu .nav-btn').forEach(btn => btn.classList.remove('active'));
+
+      const target = document.getElementById('view-' + viewName);
+      if (target) target.style.display = 'block';
+
+      const navBtn = document.querySelector(`.side-menu .nav-btn[data-view="${viewName}"]`);
+      if (navBtn) navBtn.classList.add('active');
+
+      const titles = {
+        'stats': { title: 'Thống kê vận hành', sub: 'Tổng hợp tình hình doanh thu và hiệu suất lấp sân hôm nay' },
+        'schedule': { title: 'Lịch sân & Điều phối', sub: 'Quản lý lịch 6 sân từ 06:00 đến 22:00, nhận đơn và khóa sân' },
+        'bookings': { title: 'Quản lý đơn đặt sân', sub: 'Danh sách và trạng thái toàn bộ đơn đặt tại cơ sở' },
+        'booking-detail': { title: 'Chi tiết đơn đặt', sub: 'Duyệt nhận ca, liên hệ khách hàng và in phiếu đặt' },
+        'cancellations': { title: 'Yêu cầu huỷ & Hoàn tiền', sub: 'Xem xét lý do và áp dụng chính sách hoàn tiền theo quy định' },
+        'courts': { title: 'Cơ sở & Bảng giá', sub: 'Thông tin cơ sở, quản lý 6 sân và thiết lập giá theo khung giờ' },
+        'services': { title: 'Dịch vụ & Bán lẻ', sub: 'Quản lý kho nước uống, thuê vợt, phụ kiện thi đấu' },
+        'cashflow': { title: 'Thu chi tại sân', sub: 'Minh bạch doanh thu VietQR và tiền mặt tại quầy' }
+      };
+
+      if (titles[viewName]) {
+        document.getElementById('pageTitle').innerText = titles[viewName].title;
+        document.getElementById('pageSubtitle').innerText = titles[viewName].sub;
+      }
+    }
+
+    // Render Heatmap
+    function renderHeatmap() {
+      const container = document.getElementById('heatmapContainer');
+      const days = ['Giờ', 'T2', 'T3', 'T4', 'T5', 'T6', 'T7', 'CN'];
+      const hours = ['06h', '08h', '10h', '14h', '16h', '18h', '20h'];
+      
+      let html = '';
+      days.forEach(d => {
+        html += `<div style="font-weight:700; color:var(--muted); padding:4px;">${d}</div>`;
+      });
+
+      hours.forEach((h, hIdx) => {
+        html += `<div style="font-weight:700; color:var(--muted); padding:6px 0;">${h}</div>`;
+        for (let d = 1; d <= 7; d++) {
+          let lvl = 'hm-1';
+          let txt = '45%';
+          if (hIdx >= 4 && (d >= 5 || hIdx === 5 || hIdx === 6)) {
+            lvl = 'hm-4'; txt = '95%';
+          } else if (hIdx >= 4) {
+            lvl = 'hm-3'; txt = '80%';
+          } else if (hIdx === 1 || hIdx === 0) {
+            lvl = 'hm-2'; txt = '60%';
+          } else {
+            lvl = 'hm-0'; txt = '20%';
+          }
+          html += `<div class="heatmap-cell ${lvl}">${txt}</div>`;
+        }
+      });
+      container.innerHTML = html;
+    }
+
+    // Render Schedule Grid
+    function renderSchedule() {
+      const grid = document.getElementById('scheduleGrid');
+      let html = '<div class="grid-header-cell">Giờ</div>';
+      courtsList.forEach(c => {
+        html += `<div class="grid-header-cell">${c.name}</div>`;
+      });
+
+      const times = [
+        '06:00', '07:00', '08:00', '09:00', '10:00', '11:00',
+        '12:00', '13:00', '14:00', '15:00', '16:00', '17:00',
+        '18:00', '19:00', '20:00', '21:00'
+      ];
+
+      times.forEach(t => {
+        html += `<div class="grid-time-cell">${t}</div>`;
+        courtsList.forEach(c => {
+          let slotContent = '';
+          // Mock data slot
+          if (c.id === 'C1' && (t === '18:00' || t === '19:00')) {
+            slotContent = `<div class="grid-slot-booking confirmed" onclick="event.stopPropagation(); viewBookingDetailById('AN-1510-0141')">
+              <strong>AN-0141</strong><br>Nguyễn Văn Nam
+            </div>`;
+          } else if (c.id === 'C2' && (t === '17:00' || t === '18:00')) {
+            slotContent = `<div class="grid-slot-booking pending-confirm" onclick="event.stopPropagation(); viewBookingDetailById('AN-1510-0142')">
+              <strong>AN-0142 (Chờ duyệt)</strong><br>Lê Hoàng Long
+            </div>`;
+          } else if (c.id === 'C3' && t === '19:00') {
+            slotContent = `<div class="grid-slot-booking cancelled-req" onclick="event.stopPropagation(); switchView('cancellations')">
+              <strong>Xin huỷ 19h</strong><br>Lê Văn Đức
+            </div>`;
+          } else if (c.id === 'C4' && (t === '12:00' || t === '13:00')) {
+            slotContent = `<div class="grid-slot-booking locked">
+              <i class="fa-solid fa-wrench"></i> Bảo trì sàn
+            </div>`;
+          } else if (c.id === 'P1' && (t === '19:00' || t === '20:00')) {
+            slotContent = `<div class="grid-slot-booking confirmed" onclick="event.stopPropagation(); viewBookingDetailById('AN-1510-0140')">
+              <strong>AN-0140</strong><br>Trần Minh Quang
+            </div>`;
+          }
+
+          html += `<div class="grid-slot" onclick="onSlotClick('${c.name}', '${t}')">${slotContent}</div>`;
+        });
+      });
+
+      grid.innerHTML = html;
+    }
+
+    function onSlotClick(courtName, time) {
+      document.getElementById('qbCourtSelect').value = courtName;
+      document.getElementById('qbTimeFrom').value = time;
+      openQuickBookingModal();
+    }
+
+    function filterScheduleCourt(type, btn) {
+      document.querySelectorAll('#view-schedule .btn-pill').forEach(b => b.classList.remove('active'));
+      btn.classList.add('active');
+      renderSchedule();
+    }
+
+    function setScheduleToday() {
+      document.getElementById('scheduleDateInput').value = '2026-10-15';
+      renderSchedule();
+    }
+
+    // Render Bookings Table
+    function renderBookingsTable(list) {
+      const tbody = document.getElementById('bookingsTableBody');
+      if (!list || list.length === 0) {
+        tbody.innerHTML = `<tr><td colspan="8" style="text-align:center; padding:30px; color:var(--muted);">Không tìm thấy đơn đặt nào phù hợp</td></tr>`;
+        return;
+      }
+
+      tbody.innerHTML = list.map(b => {
+        let pillClass = 'confirmed';
+        if (b.status === 'pending') pillClass = 'pending-confirm';
+        if (b.status === 'completed') pillClass = 'completed';
+        if (b.status === 'cancelled') pillClass = 'cancelled';
+
+        return `
+          <tr>
+            <td><strong style="color:var(--primary);">${b.id}</strong></td>
+            <td>
+              <div style="font-weight:700;">${b.customer}</div>
+              <div style="font-size:11.5px; color:var(--muted);">${b.phone}</div>
+            </td>
+            <td>
+              <div style="font-weight:600;">${b.court}</div>
+              <div style="font-size:11.5px; color:var(--muted);"><i class="fa-solid fa-clock"></i> ${b.time} (${b.date})</div>
+            </td>
+            <td><span style="font-size:12px;">${b.services || 'Không'}</span></td>
+            <td><strong style="color:var(--text);">${b.total.toLocaleString()} đ</strong></td>
+            <td>
+              ${b.payment === 'paid' ? '<span class="status-pill confirmed"><i class="fa-solid fa-check"></i> VietQR</span>' : '<span class="status-pill pending-payment">Tại quầy</span>'}
+            </td>
+            <td><span class="status-pill ${pillClass}">${b.statusText}</span></td>
+            <td style="text-align:right; white-space:nowrap;">
+              <button class="btn" onclick="viewBookingDetailById('${b.id}')"><i class="fa-solid fa-eye"></i> Xem</button>
+              ${b.status === 'pending' ? `
+                <button class="btn btn-green" onclick="quickAcceptOrder('${b.id}')" title="Duyệt"><i class="fa-solid fa-check"></i></button>
+                <button class="btn btn-danger" onclick="quickRejectOrder('${b.id}')" title="Từ chối"><i class="fa-solid fa-xmark"></i></button>
+              ` : ''}
+            </td>
+          </tr>
+        `;
+      }).join('');
+    }
+
+    function onSearchBookings() {
+      const kw = document.getElementById('bookingSearchInput').value.toLowerCase().trim();
+      const courtType = document.getElementById('filterCourtType').value;
+      const payment = document.getElementById('filterPaymentStatus').value;
+
+      const filtered = bookingsData.filter(b => {
+        const matchKw = !kw || b.id.toLowerCase().includes(kw) || b.customer.toLowerCase().includes(kw) || b.phone.includes(kw);
+        const matchCourt = !courtType || b.courtType === courtType;
+        const matchPay = !payment || b.payment === payment;
+        return matchKw && matchCourt && matchPay;
+      });
+
+      renderBookingsTable(filtered);
+    }
+
+    function filterBookingsTab(tab, card) {
+      document.querySelectorAll('#view-bookings .stat-card').forEach(c => c.classList.remove('active-card'));
+      card.classList.add('active-card');
+
+      if (tab === 'all') {
+        renderBookingsTable(bookingsData);
+      } else {
+        renderBookingsTable(bookingsData.filter(b => b.status === tab));
+      }
+    }
+
+    // Chi tiết đơn đặt
+    function viewBookingDetailById(orderId) {
+      const item = bookingsData.find(b => b.id === orderId) || bookingsData[0];
+      currentSelectedOrder = item;
+
+      document.getElementById('dtlOrderId').innerText = item.id;
+      document.getElementById('dtlCustomerName').innerText = item.customer;
+      document.getElementById('dtlCustomerPhone').innerText = item.phone;
+      document.getElementById('dtlCourtName').innerText = item.court;
+      document.getElementById('dtlTimeSlot').innerText = item.time + ' (' + item.date + ')';
+      document.getElementById('dtlTotalPrice').innerText = item.total.toLocaleString() + ' đ';
+      document.getElementById('dtlCustomerNote').innerText = item.note || 'Không có ghi chú thêm.';
+
+      const badge = document.getElementById('dtlStatusBadge');
+      badge.innerText = item.statusText;
+      badge.className = 'status-pill ' + (item.status === 'pending' ? 'pending-confirm' : (item.status === 'confirmed' ? 'confirmed' : 'completed'));
+
+      switchView('booking-detail');
+    }
+
+    function confirmCurrentOrder() {
+      if (!currentSelectedOrder) return;
+      currentSelectedOrder.status = 'confirmed';
+      currentSelectedOrder.statusText = 'Đã xác nhận';
+      showToast('Đã xác nhận thành công đơn ' + currentSelectedOrder.id);
+      updateBadgeCounts();
+      viewBookingDetailById(currentSelectedOrder.id);
+    }
+
+    function rejectCurrentOrder() {
+      if (!currentSelectedOrder) return;
+      if (confirm('Bạn chắc chắn muốn từ chối đơn ' + currentSelectedOrder.id + '?')) {
+        currentSelectedOrder.status = 'cancelled';
+        currentSelectedOrder.statusText = 'Đã từ chối';
+        showToast('Đã từ chối đơn ' + currentSelectedOrder.id);
+        updateBadgeCounts();
+        switchView('bookings');
+      }
+    }
+
+    function quickAcceptOrder(id) {
+      const item = bookingsData.find(b => b.id === id);
+      if (item) {
+        item.status = 'confirmed';
+        item.statusText = 'Đã xác nhận';
+        showToast('Đã duyệt đơn ' + id);
+        updateBadgeCounts();
+        renderBookingsTable(bookingsData);
+      }
+    }
+
+    function quickRejectOrder(id) {
+      const item = bookingsData.find(b => b.id === id);
+      if (item && confirm('Từ chối đơn ' + id + '?')) {
+        item.status = 'cancelled';
+        item.statusText = 'Đã huỷ';
+        showToast('Đã từ chối đơn ' + id);
+        updateBadgeCounts();
+        renderBookingsTable(bookingsData);
+      }
+    }
+
+    // Yêu cầu huỷ
+    function renderCancelTable() {
+      const tbody = document.getElementById('cancelTableBody');
+      tbody.innerHTML = cancelRequests.map(r => `
+        <tr>
+          <td><strong style="color:var(--primary);">${r.id}</strong></td>
+          <td>
+            <div style="font-weight:700;">${r.customer}</div>
+            <div style="font-size:11.5px; color:var(--muted);">${r.phone}</div>
+          </td>
+          <td>
+            <div style="font-weight:600;">${r.court}</div>
+            <div style="font-size:11.5px; color:var(--muted);">${r.time}</div>
+          </td>
+          <td><div style="max-width:240px; font-size:12.5px; color:var(--danger);">${r.reason}</div></td>
+          <td><strong style="color:var(--text);">${r.amount.toLocaleString()} đ</strong></td>
+          <td><span style="font-size:11.5px; color:var(--muted);">${r.cancelTime}</span></td>
+          <td style="text-align:right;">
+            <button class="btn btn-primary" onclick="openRefundModal('${r.id}')"><i class="fa-solid fa-gavel"></i> Xử lý yêu cầu</button>
+          </td>
+        </tr>
+      `).join('');
+    }
+
+    function switchCancelTab(type, btn) {
+      document.querySelectorAll('#view-cancellations .tab-nav-btn').forEach(b => b.classList.remove('active'));
+      btn.classList.add('active');
+      if (type === 'processed') {
+        document.getElementById('cancelTableBody').innerHTML = `
+          <tr>
+            <td><strong>AN-1510-0112</strong></td>
+            <td>Vũ Quang Huy</td>
+            <td>Sân 1 (08:00 - 10:00 14/10)</td>
+            <td>Huỷ trước 12 tiếng</td>
+            <td>160.000 đ</td>
+            <td>14/10/2026</td>
+            <td style="text-align:right;"><span class="status-pill confirmed">Đã hoàn 100%</span></td>
+          </tr>
+        `;
+      } else {
+        renderCancelTable();
+      }
+    }
+
+    function openRefundModal(orderId) {
+      const item = cancelRequests.find(r => r.id === orderId) || cancelRequests[0];
+      currentCancelActionItem = item;
+
+      document.getElementById('rfOrderId').innerText = item.id;
+      document.getElementById('rfCustomer').innerText = item.customer + ' (' + item.phone + ')';
+      document.getElementById('rfOriginalAmount').innerText = item.amount.toLocaleString() + ' đ';
+      document.getElementById('rfReason').innerText = item.reason;
+      document.getElementById('rfP100').innerText = item.amount.toLocaleString() + ' đ';
+      document.getElementById('rfP50').innerText = (item.amount * 0.5).toLocaleString() + ' đ';
+
+      document.getElementById('modalRefund').style.display = 'grid';
+    }
+
+    function confirmCancellation() {
+      if (!currentCancelActionItem) return;
+      const opt = document.querySelector('input[name="refundOption"]:checked').value;
+      const pctText = opt === '100' ? 'hoàn 100%' : (opt === '50' ? 'hoàn 50%' : 'không hoàn tiền');
+
+      // Loại bỏ khỏi danh sách chờ
+      cancelRequests = cancelRequests.filter(r => r.id !== currentCancelActionItem.id);
+      renderCancelTable();
+      updateBadgeCounts();
+      closeModal('modalRefund');
+      showToast('Đã chấp thuận huỷ đơn ' + currentCancelActionItem.id + ' (' + pctText + ')');
+    }
+
+    function rejectCancellation() {
+      if (!currentCancelActionItem) return;
+      if (confirm('Từ chối huỷ đơn ' + currentCancelActionItem.id + '?')) {
+        cancelRequests = cancelRequests.filter(r => r.id !== currentCancelActionItem.id);
+        renderCancelTable();
+        updateBadgeCounts();
+        closeModal('modalRefund');
+        showToast('Đã từ chối huỷ đơn ' + currentCancelActionItem.id);
+      }
+    }
+
+    // Modal quick booking
+    function openQuickBookingModal() {
+      document.getElementById('modalQuickBooking').style.display = 'grid';
+      calculateQuickPrice();
+    }
+
+    function openLockSlotModal() {
+      document.getElementById('modalLockSlot').style.display = 'grid';
+    }
+
+    function closeModal(id) {
+      document.getElementById(id).style.display = 'none';
+    }
+
+    function calculateQuickPrice() {
+      const f = parseInt(document.getElementById('qbTimeFrom').value.split(':')[0]);
+      const t = parseInt(document.getElementById('qbTimeTo').value.split(':')[0]);
+      const hours = Math.max(1, t - f);
+      const rate = f >= 16 ? 130000 : 80000;
+      const total = hours * rate;
+      document.getElementById('qbPricePreview').innerText = total.toLocaleString() + ' đ';
+    }
+
+    function submitQuickBooking(e) {
+      e.preventDefault();
+      const name = document.getElementById('qbCustomerName').value;
+      const phone = document.getElementById('qbCustomerPhone').value;
+      const court = document.getElementById('qbCourtSelect').value;
+      const date = document.getElementById('qbDate').value;
+      const time = document.getElementById('qbTimeFrom').value + ' - ' + document.getElementById('qbTimeTo').value;
+      const pay = document.getElementById('qbPaymentType').value;
+      const newId = 'AN-1510-0' + (142 + bookingsData.length + 1);
+
+      const newOrder = {
+        id: newId,
+        customer: name,
+        phone: phone,
+        court: court,
+        courtType: court.includes('Pickleball') ? 'Pickleball' : 'Cầu lông',
+        date: date,
+        time: time,
+        services: 'Đặt tại chỗ',
+        total: 260000,
+        payment: pay.includes('VietQR') ? 'paid' : 'unpaid',
+        status: 'confirmed',
+        statusText: 'Đã xác nhận',
+        note: 'Đơn đặt trực tiếp tại quầy (' + pay + ')'
+      };
+
+      bookingsData.unshift(newOrder);
+      renderBookingsTable(bookingsData);
+      renderSchedule();
+      updateBadgeCounts();
+      closeModal('modalQuickBooking');
+      showToast('Đã tạo thành công đơn đặt tại quầy ' + newId);
+    }
+
+    function submitLockSlot(e) {
+      e.preventDefault();
+      const court = document.getElementById('lockCourtSelect').value;
+      const time = document.getElementById('lockTimeFrom').value + ' - ' + document.getElementById('lockTimeTo').value;
+      const reason = document.getElementById('lockReason').value;
+
+      closeModal('modalLockSlot');
+      showToast('Đã khóa ' + court + ' (' + time + '): ' + reason);
+      renderSchedule();
+    }
+
+    // Dịch vụ
+    function handleCreateService(e) {
+      e.preventDefault();
+      const name = document.getElementById('newSvcName').value;
+      const cat = document.getElementById('newSvcCat').value;
+      const price = parseInt(document.getElementById('newSvcPrice').value);
+      const stock = parseInt(document.getElementById('newSvcStock').value);
+
+      const tbody = document.getElementById('servicesTableBody');
+      const tr = document.createElement('tr');
+      tr.innerHTML = `
+        <td><strong>${name}</strong></td>
+        <td><span class="status-pill pending-confirm">${cat}</span></td>
+        <td>${price.toLocaleString()} đ</td>
+        <td><strong>${stock}</strong> cái</td>
+        <td style="text-align:right;"><button class="btn" onclick="quickEditStock(this)">+ Nhập kho</button></td>
+      `;
+      tbody.prepend(tr);
+      e.target.reset();
+      showToast('Đã thêm sản phẩm ' + name + ' vào danh mục!');
+    }
+
+    function quickEditStock(btn) {
+      const tdStock = btn.closest('tr').children[3].querySelector('strong');
+      let val = parseInt(tdStock.innerText) || 0;
+      val += 10;
+      tdStock.innerText = val;
+      showToast('Đã cộng thêm 10 vào tồn kho!');
+    }
+
+    // Thu chi
+    function handleCreateCashflow(e) {
+      e.preventDefault();
+      const type = document.getElementById('cfType').value;
+      const note = document.getElementById('cfNote').value;
+      const amount = parseInt(document.getElementById('cfAmount').value);
+      const method = document.getElementById('cfMethod').value;
+
+      const tbody = document.getElementById('cashflowTableBody');
+      const tr = document.createElement('tr');
+      const isIncome = type === 'in';
+      tr.innerHTML = `
+        <td>Vừa xong</td>
+        <td>${note}</td>
+        <td><span class="status-pill ${method === 'VietQR' ? 'confirmed' : 'pending-payment'}">${method}</span></td>
+        <td style="color:${isIncome ? 'var(--green)' : 'var(--danger)'}; font-weight:700;">${isIncome ? '+' : '-'}${amount.toLocaleString()} đ</td>
+        <td>Nguyễn Minh Tâm</td>
+      `;
+      tbody.prepend(tr);
+      e.target.reset();
+      showToast('Đã ghi nhận khoản ' + (isIncome ? 'thu' : 'chi') + ' thành công!');
+    }
+
+    function toggleCourtState(btn) {
+      const tr = btn.closest('tr');
+      const badge = tr.children[3].querySelector('.status-pill');
+      if (btn.innerText === 'Tạm dừng') {
+        btn.innerText = 'Mở lại';
+        badge.className = 'status-pill cancelled';
+        badge.innerText = 'Tạm dừng';
+        showToast('Đã tạm dừng nhận lịch trên sân này!');
+      } else {
+        btn.innerText = 'Tạm dừng';
+        badge.className = 'status-pill confirmed';
+        badge.innerText = 'Đang hoạt động';
+        showToast('Đã mở lại sân hoạt động!');
+      }
+    }
+
+    function updateBadgeCounts() {
+      const pendingCount = bookingsData.filter(b => b.status === 'pending').length;
+      document.getElementById('badgePendingBookings').innerText = pendingCount;
+      document.getElementById('badgeCancellations').innerText = cancelRequests.length;
+      document.getElementById('countAllBookings').innerText = bookingsData.length;
+      document.getElementById('countPendingBookings').innerText = pendingCount;
+      document.getElementById('countConfirmedBookings').innerText = bookingsData.filter(b => b.status === 'confirmed').length;
+      document.getElementById('countCancelledBookings').innerText = bookingsData.filter(b => b.status === 'cancelled').length;
+    }
+
+    function onBranchChange() {
+      const sel = document.getElementById('branchSelector');
+      showToast('Đã chuyển sang quản lý cơ sở: ' + sel.options[sel.selectedIndex].text);
+    }
+
+    function refreshData() {
+      showToast('Đang cập nhật dữ liệu mới nhất từ máy chủ...');
+      fetchBackendCourts();
+      setTimeout(() => {
+        showToast('Dữ liệu đã được đồng bộ hoàn tất!');
+      }, 500);
+    }
+
+    function showToast(msg) {
+      const t = document.getElementById('toastMessage');
+      document.getElementById('toastText').innerText = msg;
+      t.classList.add('show');
+      setTimeout(() => t.classList.remove('show'), 2800);
+    }
+
+    function logout() {
+      if (confirm('Bạn muốn đăng xuất khỏi Cổng Chủ Sân?')) {
+        sessionStorage.removeItem('currentUser');
+        window.location.href = 'login.html';
+      }
+    }
+  </script>
+</body>
+</html>

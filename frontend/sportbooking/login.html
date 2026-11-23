@@ -1,0 +1,580 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Đăng nhập & Đăng ký - SportBooking</title>
+    <!-- Bootstrap 5 CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+    <!-- FontAwesome 6 -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css">
+    <style>
+        body {
+            background: linear-gradient(135deg, #e8f5e9 0%, #c8e6c9 100%);
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            padding: 20px 0;
+        }
+        .auth-card {
+            border: none;
+            border-radius: 16px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+            overflow: hidden;
+            background: #ffffff;
+            width: 100%;
+            max-width: 480px;
+        }
+        .auth-header {
+            background-color: #198754;
+            color: #ffffff;
+            padding: 20px 24px;
+            position: relative;
+        }
+        .btn-back-home {
+            position: absolute;
+            left: 18px;
+            top: 50%;
+            transform: translateY(-50%);
+            color: #ffffff;
+            font-size: 1.5rem;
+            text-decoration: none;
+            width: 38px;
+            height: 38px;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 50%;
+            transition: all 0.2s ease;
+            background: rgba(255, 255, 255, 0.15);
+        }
+        .btn-back-home:hover {
+            background: rgba(255, 255, 255, 0.3);
+            color: #ffffff;
+            transform: translateY(-50%) scale(1.05);
+        }
+        .nav-pills .nav-link {
+            color: #495057;
+            font-weight: 600;
+            border-radius: 10px;
+            padding: 10px;
+            transition: all 0.3s;
+        }
+        .nav-pills .nav-link.active {
+            background-color: #198754;
+            color: #fff;
+            box-shadow: 0 4px 10px rgba(25, 135, 84, 0.3);
+        }
+        .form-control:focus {
+            border-color: #198754;
+            box-shadow: 0 0 0 0.25rem rgba(25, 135, 84, 0.2);
+        }
+        .btn-success {
+            background-color: #198754;
+            border-color: #198754;
+            font-weight: 600;
+            padding: 10px;
+            border-radius: 8px;
+        }
+        .btn-success:hover {
+            background-color: #146c43;
+            border-color: #13653f;
+        }
+        .btn-google {
+            border: 1px solid #dee2e6;
+            background: #ffffff;
+            color: #333333;
+            font-weight: 600;
+            padding: 10px;
+            border-radius: 8px;
+            transition: all 0.2s;
+        }
+        .btn-google:hover {
+            background: #f8f9fa;
+            border-color: #c1c9d0;
+        }
+        .divider {
+            display: flex;
+            align-items: center;
+            text-align: center;
+            margin: 18px 0;
+            color: #6c757d;
+            font-size: 0.85rem;
+        }
+        .divider::before, .divider::after {
+            content: '';
+            flex: 1;
+            border-bottom: 1px solid #dee2e6;
+        }
+        .divider:not(:empty)::before {
+            margin-right: .75em;
+        }
+        .divider:not(:empty)::after {
+            margin-left: .75em;
+        }
+        .password-toggle {
+            cursor: pointer;
+            color: #6c757d;
+        }
+        .password-toggle:hover {
+            color: #198754;
+        }
+        .alert-custom {
+            display: none;
+            border-radius: 8px;
+            font-size: 0.95rem;
+            animation: fadeIn 0.3s;
+        }
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(-5px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+    </style>
+</head>
+<body>
+
+    <div class="auth-card">
+        <!-- HEADER CÓ DẤU "<" QUAY VỀ TRANG CHỦ -->
+        <div class="auth-header text-center">
+            <a href="index.html" class="btn-back-home" title="Dừng quá trình và quay về trang chủ" id="btnBackHome">
+                &lt;
+            </a>
+            <h4 class="mb-0 fw-bold"><i class="fa-solid fa-futbol me-2"></i>SportBooking</h4>
+            <small class="opacity-75">Hệ thống đặt sân thể thao trực tuyến</small>
+        </div>
+
+        <div class="p-4">
+            <!-- VÙNG HIỂN THỊ THÔNG BÁO LỖI / THÀNH CÔNG -->
+            <div id="alertBox" class="alert alert-custom alert-dismissible fade show mb-3" role="alert">
+                <span id="alertMessage"></span>
+                <button type="button" class="btn-close" onclick="hideAlert()" aria-label="Close"></button>
+            </div>
+
+            <!-- TAB ĐIỀU HƯỚNG ĐĂNG NHẬP / ĐĂNG KÝ -->
+            <ul class="nav nav-pills nav-fill mb-4 bg-light p-1 rounded-3" id="authTabs" role="tablist">
+                <li class="nav-item" role="presentation">
+                    <button class="nav-link active" id="tab-login" data-bs-toggle="pill" data-bs-target="#pane-login" type="button" role="tab" aria-controls="pane-login" aria-selected="true">
+                        <i class="fa-solid fa-right-to-bracket me-1"></i> Đăng nhập
+                    </button>
+                </li>
+                <li class="nav-item" role="presentation">
+                    <button class="nav-link" id="tab-register" data-bs-toggle="pill" data-bs-target="#pane-register" type="button" role="tab" aria-controls="pane-register" aria-selected="false">
+                        <i class="fa-solid fa-user-plus me-1"></i> Đăng ký
+                    </button>
+                </li>
+            </ul>
+
+            <div class="tab-content" id="authTabsContent">
+                <!-- ================= USE CASE: ĐĂNG NHẬP ================= -->
+                <div class="tab-pane fade show active" id="pane-login" role="tabpanel" aria-labelledby="tab-login">
+                    <form id="formLogin" novalidate>
+                        <!-- Chọn phương thức đăng nhập -->
+                        <div class="mb-3">
+                            <label class="form-label fw-semibold">Phương thức đăng nhập:</label>
+                            <div class="d-flex gap-3 mb-2">
+                                <div class="form-check">
+                                    <input class="form-check-input" type="radio" name="loginMethod" id="methodEmail" value="email" checked>
+                                    <label class="form-check-label" for="methodEmail">Email</label>
+                                </div>
+                                <div class="form-check">
+                                    <input class="form-check-input" type="radio" name="loginMethod" id="methodPhone" value="phone">
+                                    <label class="form-check-label" for="methodPhone">Số điện thoại</label>
+                                </div>
+                            </div>
+                            <div class="input-group">
+                                <span class="input-group-text"><i id="loginIdentifierIcon" class="fa-solid fa-envelope"></i></span>
+                                <input type="text" class="form-control" id="loginIdentifier" placeholder="Nhập địa chỉ email" required>
+                            </div>
+                        </div>
+
+                        <!-- Mật khẩu -->
+                        <div class="mb-3">
+                            <label for="loginPassword" class="form-label fw-semibold">Mật khẩu:</label>
+                            <div class="input-group">
+                                <span class="input-group-text"><i class="fa-solid fa-lock"></i></span>
+                                <input type="password" class="form-control" id="loginPassword" placeholder="Nhập mật khẩu" required>
+                                <span class="input-group-text password-toggle" onclick="togglePasswordVisibility('loginPassword', this)">
+                                    <i class="fa-solid fa-eye"></i>
+                                </span>
+                            </div>
+                        </div>
+
+                        <!-- Nút Đăng nhập -->
+                        <button type="submit" class="btn btn-success w-100 mb-2" id="btnLoginSubmit">
+                            <i class="fa-solid fa-right-to-bracket me-1"></i> Đăng nhập
+                        </button>
+
+                        <div class="divider">HOẶC</div>
+
+                        <!-- Đăng nhập bằng Google -->
+                        <button type="button" class="btn btn-google w-100 mb-3" id="btnGoogleLogin">
+                            <svg class="me-2" style="width:18px;height:18px;vertical-align:-3px;" viewBox="0 0 24 24">
+                                <path fill="#4285F4" d="M23.745 12.27c0-.7-.06-1.4-.19-2.07H12v4.51h6.6c-.29 1.52-1.14 2.8-2.4 3.65v3.03h3.88c2.27-2.09 3.665-5.17 3.665-9.12z"/>
+                                <path fill="#34A853" d="M12 24c3.24 0 5.95-1.08 7.93-2.91l-3.88-3.03c-1.08.72-2.45 1.16-4.05 1.16-3.12 0-5.77-2.1-6.72-4.93H1.26v3.13C3.27 21.39 7.32 24 12 24z"/>
+                                <path fill="#FBBC05" d="M5.28 14.29c-.25-.72-.38-1.49-.38-2.29s.13-1.57.38-2.29V6.58H1.26C.46 8.17 0 9.99 0 12s.46 3.83 1.26 5.42l4.02-3.13z"/>
+                                <path fill="#EA4335" d="M12 4.75c1.77 0 3.35.61 4.6 1.8l3.42-3.42C17.95 1.19 15.24 0 12 0 7.32 0 3.27 2.61 1.26 6.58l4.02 3.13c.95-2.83 3.6-4.96 6.72-4.96z"/>
+                            </svg>
+                            Đăng nhập bằng tài khoản Google
+                        </button>
+
+                        <!-- TRUY CẬP NHANH CỔNG QUẢN TRỊ / CHỦ SÂN -->
+                        <div class="pt-3 border-top">
+                            <div class="text-center text-muted small mb-2 fw-semibold">Truy cập nhanh cổng giao diện:</div>
+                            <div class="d-grid gap-2">
+                                <button type="button" class="btn btn-sm btn-outline-warning text-dark fw-semibold" onclick="quickLogin('admin','1234')">
+                                    🛡️ Vào Cổng Quản trị viên (Admin)
+                                </button>
+                                <button type="button" class="btn btn-sm btn-outline-primary fw-semibold" onclick="quickLogin('chusan@gmail.com','123456')">
+                                    🏸 Vào Cổng Chủ sân (Owner)
+                                </button>
+                                <button type="button" class="btn btn-sm btn-outline-secondary fw-semibold" onclick="quickLogin('khachhang1@gmail.com','123456')">
+                                    👤 Vào Trang Khách hàng
+                                </button>
+                            </div>
+                        </div>
+                    </form>
+                </div>
+
+                <!-- ================= USE CASE: ĐĂNG KÝ ================= -->
+                <div class="tab-pane fade" id="pane-register" role="tabpanel" aria-labelledby="tab-register">
+                    <form id="formRegister" novalidate>
+                        <!-- Họ và tên đầy đủ -->
+                        <div class="mb-3">
+                            <label for="regFullName" class="form-label fw-semibold">Họ và tên đầy đủ:</label>
+                            <div class="input-group">
+                                <span class="input-group-text"><i class="fa-solid fa-user"></i></span>
+                                <input type="text" class="form-control" id="regFullName" placeholder="Ví dụ: Nguyễn Văn An" required>
+                            </div>
+                        </div>
+
+                        <!-- Số điện thoại -->
+                        <div class="mb-3">
+                            <label for="regPhone" class="form-label fw-semibold">Số điện thoại:</label>
+                            <div class="input-group">
+                                <span class="input-group-text"><i class="fa-solid fa-phone"></i></span>
+                                <input type="tel" class="form-control" id="regPhone" placeholder="Ví dụ: 0912345678" required>
+                            </div>
+                        </div>
+
+                        <!-- Email -->
+                        <div class="mb-3">
+                            <label for="regEmail" class="form-label fw-semibold">Email:</label>
+                            <div class="input-group">
+                                <span class="input-group-text"><i class="fa-solid fa-envelope"></i></span>
+                                <input type="email" class="form-control" id="regEmail" placeholder="Ví dụ: example@gmail.com" required>
+                            </div>
+                        </div>
+
+                        <!-- Mật khẩu -->
+                        <div class="mb-3">
+                            <label for="regPassword" class="form-label fw-semibold">Mật khẩu:</label>
+                            <div class="input-group">
+                                <span class="input-group-text"><i class="fa-solid fa-lock"></i></span>
+                                <input type="password" class="form-control" id="regPassword" placeholder="Tối thiểu 8 ký tự" required>
+                                <span class="input-group-text password-toggle" onclick="togglePasswordVisibility('regPassword', this)">
+                                    <i class="fa-solid fa-eye"></i>
+                                </span>
+                            </div>
+                        </div>
+
+                        <!-- Nhập lại mật khẩu -->
+                        <div class="mb-3">
+                            <label for="regConfirmPassword" class="form-label fw-semibold">Nhập lại mật khẩu:</label>
+                            <div class="input-group">
+                                <span class="input-group-text"><i class="fa-solid fa-shield-halved"></i></span>
+                                <input type="password" class="form-control" id="regConfirmPassword" placeholder="Nhập lại chính xác mật khẩu" required>
+                                <span class="input-group-text password-toggle" onclick="togglePasswordVisibility('regConfirmPassword', this)">
+                                    <i class="fa-solid fa-eye"></i>
+                                </span>
+                            </div>
+                        </div>
+
+                        <!-- Nút Đăng ký -->
+                        <button type="submit" class="btn btn-success w-100" id="btnRegisterSubmit">
+                            <i class="fa-solid fa-user-plus me-1"></i> Đăng ký
+                        </button>
+                    </form>
+                </div>
+            </div>
+
+            <!-- Ghi chú vai trò hỗ trợ -->
+            <div class="text-center mt-3 text-muted" style="font-size: 0.8rem;">
+                Hệ thống hỗ trợ tài khoản: Khách hàng, Chủ sân, Quản trị viên
+            </div>
+        </div>
+    </div>
+
+    <!-- Bootstrap 5 Bundle JS -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+
+    <!-- XỬ LÝ SỰ KIỆN & VALIDATION THEO ĐẶC TẢ USE CASE -->
+    <script>
+        // Địa chỉ Backend Java API (tự động điều chỉnh theo host hiện tại)
+        const BACKEND_API_URL = (window.location.origin && window.location.origin.includes('localhost'))
+            ? window.location.origin + '/api'
+            : 'http://localhost:8080/api';
+
+        // Dữ liệu mẫu mô phỏng Database TAIKHOAN (theo schema.sql và seeddata.sql)
+        // Dùng làm Fallback khi Backend server chưa khởi chạy để trải nghiệm ngay trên trình duyệt
+        let mockDatabase = [
+            { hoVaTen: "Quản trị viên", soDienThoai: "0901234567", email: "admin", matKhau: "1234", vaiTro: "Admin" },
+            { hoVaTen: "Nguyễn Văn Chủ", soDienThoai: "0912345678", email: "chusan@gmail.com", matKhau: "123456", vaiTro: "Chủ sân" },
+            { hoVaTen: "Trần Văn Khách", soDienThoai: "0923456789", email: "khachhang1@gmail.com", matKhau: "123456", vaiTro: "Khách hàng" },
+            { hoVaTen: "Lê Thị Hoa", soDienThoai: "0934567890", email: "khachhang2@gmail.com", matKhau: "123456", vaiTro: "Khách hàng" }
+        ];
+
+        // Hàm ẩn hiện thông báo Alert
+        function showAlert(message, type = 'danger') {
+            const alertBox = document.getElementById('alertBox');
+            const alertMsg = document.getElementById('alertMessage');
+            alertBox.className = `alert alert-${type} alert-custom alert-dismissible fade show mb-3`;
+            alertBox.style.display = 'block';
+            alertMsg.textContent = message;
+            alertBox.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+        }
+
+        function hideAlert() {
+            const alertBox = document.getElementById('alertBox');
+            alertBox.style.display = 'none';
+        }
+
+        // Ẩn/Hiện mật khẩu
+        function togglePasswordVisibility(fieldId, toggleElem) {
+            const input = document.getElementById(fieldId);
+            const icon = toggleElem.querySelector('i');
+            if (input.type === 'password') {
+                input.type = 'text';
+                icon.classList.remove('fa-eye');
+                icon.classList.add('fa-eye-slash');
+            } else {
+                input.type = 'password';
+                icon.classList.remove('fa-eye-slash');
+                icon.classList.add('fa-eye');
+            }
+        }
+
+        // Điều chỉnh giao diện theo radio chọn phương thức đăng nhập
+        const methodEmail = document.getElementById('methodEmail');
+        const methodPhone = document.getElementById('methodPhone');
+        const loginIdentifier = document.getElementById('loginIdentifier');
+        const loginIdentifierIcon = document.getElementById('loginIdentifierIcon');
+
+        function updateLoginMethod() {
+            hideAlert();
+            if (methodEmail.checked) {
+                loginIdentifier.type = 'email';
+                loginIdentifier.placeholder = 'Nhập địa chỉ email (ví dụ: khachhang1@gmail.com hoặc admin)';
+                loginIdentifierIcon.className = 'fa-solid fa-envelope';
+            } else {
+                loginIdentifier.type = 'tel';
+                loginIdentifier.placeholder = 'Nhập số điện thoại (ví dụ: 0923456789)';
+                loginIdentifierIcon.className = 'fa-solid fa-phone';
+            }
+        }
+        methodEmail.addEventListener('change', updateLoginMethod);
+        methodPhone.addEventListener('change', updateLoginMethod);
+
+        // Kiểm tra định dạng số điện thoại Việt Nam (10 số, bắt đầu bằng 0)
+        function isValidPhoneNumber(phone) {
+            const phoneRegex = /^(0)(3|5|7|8|9)[0-9]{8}$/;
+            return phoneRegex.test(phone.trim());
+        }
+
+        // Kiểm tra định dạng Email (chấp nhận cả admin để đăng nhập tài khoản quản trị mẫu)
+        function isValidEmail(email) {
+            if (email.trim().toLowerCase() === 'admin') return true;
+            const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+            return emailRegex.test(email.trim());
+        }
+
+        // Tự động nhận diện hash trên URL (VD: login.html#register)
+        window.addEventListener('DOMContentLoaded', () => {
+            if (window.location.hash === '#register') {
+                const tabRegister = new bootstrap.Tab(document.getElementById('tab-register'));
+                tabRegister.show();
+            }
+            updateLoginMethod();
+        });
+
+        // ================= XỬ LÝ SUBMIT ĐĂNG KÝ =================
+        document.getElementById('formRegister').addEventListener('submit', async function (e) {
+            e.preventDefault();
+            hideAlert();
+
+            const fullName = document.getElementById('regFullName').value.trim();
+            const phone = document.getElementById('regPhone').value.trim();
+            const email = document.getElementById('regEmail').value.trim();
+            const password = document.getElementById('regPassword').value;
+            const confirmPassword = document.getElementById('regConfirmPassword').value;
+
+            // --- KIỂM TRA LUỒNG RẼ NHÁNH ĐĂNG KÝ THEO ĐẶC TẢ ---
+            // 1. Kiểm tra Họ và tên
+            if (!fullName) {
+                showAlert('Nhập họ và tên', 'warning');
+                document.getElementById('regFullName').focus();
+                return;
+            }
+
+            // 2. Kiểm tra Số điện thoại
+            if (!phone || !isValidPhoneNumber(phone)) {
+                showAlert('Số điện thoại di động không đúng', 'warning');
+                document.getElementById('regPhone').focus();
+                return;
+            }
+
+            // 3. Kiểm tra Email
+            if (!email || !isValidEmail(email)) {
+                showAlert('Email không hợp lệ, vui lòng nhập lại', 'warning');
+                document.getElementById('regEmail').focus();
+                return;
+            }
+
+            // 4. Mật khẩu có độ dài tối thiểu 8 ký tự
+            if (!password || password.length < 8) {
+                showAlert('Mật khẩu có độ dài tối thiểu 8 ký tự', 'warning');
+                document.getElementById('regPassword').focus();
+                return;
+            }
+
+            // 5. Xác nhận mật khẩu không khớp
+            if (password !== confirmPassword) {
+                showAlert('Xác nhận mật khẩu không khớp', 'warning');
+                document.getElementById('regConfirmPassword').focus();
+                return;
+            }
+
+            // --- GỬI YÊU CẦU ĐẾN BACKEND JAVA ---
+            const payload = {
+                hoVaTen: fullName,
+                soDienThoai: phone,
+                email: email,
+                matKhau: password,
+                vaiTro: "Khách hàng"
+            };
+
+            try {
+                const response = await fetch(`${BACKEND_API_URL}/register`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(payload)
+                });
+
+                const data = await response.json();
+                if (response.ok && data.success) {
+                    // Hiển thị thông báo "Đăng ký thành công" và kết thúc use case
+                    showAlert('Đăng ký thành công', 'success');
+                    document.getElementById('formRegister').reset();
+                    // Chuyển sang tab đăng nhập sau 1.5 giây
+                    setTimeout(() => {
+                        const tabLogin = new bootstrap.Tab(document.getElementById('tab-login'));
+                        tabLogin.show();
+                        document.getElementById('loginIdentifier').value = email;
+                    }, 1500);
+                } else {
+                    showAlert(data.message || 'Lỗi đăng ký, vui lòng thử lại', 'danger');
+                }
+            } catch (err) {
+                // Luồng rẽ nhánh 3: Nếu không kết nối được hệ thống / CSDL -> Hiển thị "Lỗi kết nối hệ thống"
+                console.error('Không thể kết nối đến Backend Server:', err);
+                showAlert('Lỗi kết nối hệ thống (Vui lòng khởi động Backend Java: java login.java)', 'danger');
+            }
+        });
+
+        // ================= XỬ LÝ SUBMIT ĐĂNG NHẬP =================
+        document.getElementById('formLogin').addEventListener('submit', async function (e) {
+            e.preventDefault();
+            hideAlert();
+
+            const isEmail = methodEmail.checked;
+            const identifier = loginIdentifier.value.trim();
+            const password = document.getElementById('loginPassword').value;
+
+            // --- KIỂM TRA LUỒNG RẼ NHÁNH ĐĂNG NHẬP THEO ĐẶC TẢ ---
+            // 1. Kiểm tra định dạng theo phương thức đã chọn
+            if (isEmail) {
+                if (!identifier || !isValidEmail(identifier)) {
+                    showAlert('Email không hợp lệ, vui lòng nhập lại', 'warning');
+                    loginIdentifier.focus();
+                    return;
+                }
+            } else {
+                if (!identifier || !isValidPhoneNumber(identifier)) {
+                    showAlert('Số điện thoại di động không hợp lệ, vui lòng nhập lại!', 'warning');
+                    loginIdentifier.focus();
+                    return;
+                }
+            }
+
+            if (!password) {
+                showAlert('Đăng nhập thất bại, vui lòng thử lại', 'danger');
+                document.getElementById('loginPassword').focus();
+                return;
+            }
+
+            // --- GỬI YÊU CẦU ĐẾN BACKEND JAVA ---
+            const payload = {
+                identifier: identifier,
+                password: password,
+                method: isEmail ? 'email' : 'phone'
+            };
+
+            try {
+                const response = await fetch(`${BACKEND_API_URL}/login`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(payload)
+                });
+
+                const data = await response.json();
+                if (response.ok && data.success) {
+                    showAlert('Đăng nhập thành công', 'success');
+                    sessionStorage.setItem('currentUser', JSON.stringify(data.user));
+                    setTimeout(() => {
+                        // Điều hướng chính xác theo phân quyền (RBAC)
+                        if (data.user && data.user.vaiTro === 'Admin') {
+                            window.location.href = 'admin.html';
+                        } else if (data.user && data.user.vaiTro === 'Chủ sân') {
+                            window.location.href = 'owner.html';
+                        } else {
+                            window.location.href = 'index.html';
+                        }
+                    }, 1200);
+                } else {
+                    // Khi sai tài khoản/mật khẩu: hiện thông báo theo yêu cầu
+                    showAlert(data.message || 'Đăng nhập thất bại, vui lòng thử lại', 'danger');
+                }
+            } catch (err) {
+                // Luồng rẽ nhánh 3: Nếu không kết nối được hệ thống / CSDL -> Hiển thị "Lỗi kết nối hệ thống"
+                console.error('Không thể kết nối Backend HTTP Server:', err);
+                showAlert('Lỗi kết nối hệ thống (Vui lòng khởi động Backend Java: java login.java)', 'danger');
+            }
+        });
+
+        // Đăng nhập bằng Google
+        document.getElementById('btnGoogleLogin').addEventListener('click', function () {
+            showAlert('Đang chuyển hướng xác thực tài khoản Google...', 'info');
+            setTimeout(() => {
+                showAlert('Đăng nhập thành công', 'success');
+                sessionStorage.setItem('currentUser', JSON.stringify({
+                    hoVaTen: "Google User",
+                    email: "user@gmail.com",
+                    vaiTro: "Khách hàng"
+                }));
+                setTimeout(() => {
+                    window.location.href = 'index.html';
+                }, 1000);
+            }, 800);
+        });
+        // Đăng nhập nhanh
+        function quickLogin(u, p) {
+            document.getElementById('methodEmail').checked = true;
+            document.getElementById('loginIdentifier').value = u;
+            document.getElementById('loginPassword').value = p;
+            document.getElementById('formLogin').dispatchEvent(new Event('submit'));
+        }
+    </script>
+</body>
+</html>
+

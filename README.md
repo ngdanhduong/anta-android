@@ -1,8 +1,8 @@
 # Anta
 
-Android app for finding sports venues and booking court time. Module `anta/`: Kotlin, Jetpack Compose, Material 3, one activity.
+Android app for finding sports venues and booking court time. Module located at `backend/app/`: Kotlin, Jetpack Compose, Material 3, one activity.
 
-It talks to the backend kept in a [separate repository](https://github.com/nguyendanhduong8cntd-cmyk/anta-backend) (checked out at `backend/`, ignored by this repository's git).
+It talks to the backend kept in the `backend/` folder (or deployed API server).
 
 ## What works
 
@@ -29,7 +29,7 @@ Not built: chat and push notifications, which the backend has endpoints for.
 The debug build talks to the shared demo backend on Render, `https://anta-backend.onrender.com/api/v1`, so a fresh clone runs as it is: open it in Android Studio and press Run, on a phone or an emulator with internet access. The free instance sleeps after 15 idle minutes and takes about a minute to answer the first request after that; opening `https://anta-backend.onrender.com/api/v1/health/ready` in a browser wakes it.
 
 ```powershell
-.\gradlew.bat :anta:installDebug
+.\gradlew.bat :app:installDebug
 adb shell am start -n vn.anta.booking/.MainActivity
 ```
 

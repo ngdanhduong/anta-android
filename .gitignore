@@ -1,11 +1,20 @@
-# Two independent repositories share this workspace.
-/backend/
+# Backend temporary, build artifacts and dependencies
+/backend/node_modules/
+/backend/dist/
+/backend/data/
+/backend/packages/*/node_modules/
+/backend/packages/*/dist/
+/backend/python_backend/.venv/
+/backend/python_backend/**/__pycache__/
+/backend/.pytest_cache/
+**/target/
+
 
 # Local Android and Gradle state.
-/.gradle/
-/.idea/
-/.kotlin/
-/local.properties
+**/.gradle/
+**/.idea/
+**/.kotlin/
+**/local.properties
 **/build/
 *.iml
 *.log

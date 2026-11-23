@@ -1,0 +1,15 @@
+# Android SDK path (Adjust to your Android SDK location)
+# sdk.dir=C\:\\Users\\YourUsername\\AppData\\Local\\Android\\Sdk
+
+# Backend API Base URL:
+# Default points to remote Render backend. To point to your local Microservices API Gateway, uncomment:
+# anta.debugApiUrl=http://10.0.2.2:8080/api/v1
+
+# Optional: Development key matching DEV_ADMIN_KEY in backend/.env
+# anta.devKey=anta-dev-key-replace-with-at-least-32-random-chars
+
+# Optional: Firebase config for OTP Push notifications in debug build
+# anta.firebaseAppId=1:123456789:android:abcdef
+# anta.firebaseApiKey=AIzaSy...
+# anta.firebaseProjectId=anta-demo
+# anta.firebaseSenderId=123456789

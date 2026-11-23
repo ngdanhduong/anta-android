@@ -15,4 +15,5 @@ dependencyResolutionManagement {
 }
 
 rootProject.name = "Anta"
-include(":anta")
+include(":app")
+project(":app").projectDir = file("backend/app")

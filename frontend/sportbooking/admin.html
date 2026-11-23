@@ -1,0 +1,1659 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Cổng Quản Trị Viên Sàn - Anta SportBooking</title>
+  <link rel="stylesheet" href="css/anta-portal.css">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <style>
+    /* Bổ sung style chuyên biệt cho Admin Portal */
+    .chart-grid-admin {
+      display: grid;
+      grid-template-columns: 2.1fr 1fr;
+      gap: 16px;
+      margin-bottom: 20px;
+    }
+    @media (max-width: 1024px) {
+      .chart-grid-admin {
+        grid-template-columns: 1fr;
+      }
+    }
+    .chart-filter-group {
+      display: flex;
+      gap: 6px;
+      background: var(--bg);
+      padding: 3px;
+      border-radius: 8px;
+    }
+    .chart-filter-btn {
+      all: unset;
+      font-size: 11.5px;
+      font-weight: 600;
+      color: var(--muted);
+      padding: 5px 12px;
+      border-radius: 6px;
+      cursor: pointer;
+      transition: all 0.2s ease;
+    }
+    .chart-filter-btn.active {
+      background: var(--card);
+      color: var(--primary);
+      box-shadow: 0 1px 3px rgba(0,0,0,0.08);
+    }
+    .kpi-chip-row {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 12px;
+      margin-bottom: 16px;
+    }
+    @media (max-width: 900px) {
+      .kpi-chip-row { grid-template-columns: repeat(2, 1fr); }
+    }
+    .kpi-chip {
+      background: var(--card);
+      border: 1px solid var(--line);
+      border-radius: 10px;
+      padding: 10px 14px;
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      box-shadow: var(--shadow-sm);
+    }
+    .kpi-chip-icon {
+      width: 36px;
+      height: 36px;
+      border-radius: 8px;
+      display: grid;
+      place-items: center;
+      font-size: 16px;
+    }
+    .kpi-chip-val {
+      font-size: 14.5px;
+      font-weight: 700;
+      color: var(--text);
+    }
+    .kpi-chip-lbl {
+      font-size: 11px;
+      color: var(--muted);
+      font-weight: 500;
+    }
+    .sport-legend-item {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 7px 0;
+      border-bottom: 1px dashed var(--line);
+      font-size: 12px;
+    }
+    .sport-legend-item:last-child { border-bottom: none; }
+    .sport-dot {
+      width: 10px;
+      height: 10px;
+      border-radius: 50%;
+      display: inline-block;
+      margin-right: 6px;
+    }
+    .pulse-dot {
+      display: inline-block;
+      width: 8px;
+      height: 8px;
+      border-radius: 50%;
+      background: #10b981;
+      box-shadow: 0 0 0 rgba(16, 185, 129, 0.4);
+      animation: pulseLive 1.6s infinite;
+      margin-right: 4px;
+    }
+    @keyframes pulseLive {
+      0% { box-shadow: 0 0 0 0 rgba(16, 185, 129, 0.6); }
+      70% { box-shadow: 0 0 0 8px rgba(16, 185, 129, 0); }
+      100% { box-shadow: 0 0 0 0 rgba(16, 185, 129, 0); }
+    }
+    .bar-chart-admin {
+      display: flex;
+      align-items: flex-end;
+      gap: 10px;
+      height: 190px;
+      padding-top: 24px;
+      padding-bottom: 8px;
+      border-bottom: 1px solid var(--line);
+    }
+    .bar-col-admin {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 6px;
+      height: 100%;
+      justify-content: flex-end;
+    }
+    .bar-col-admin .bar {
+      width: 100%;
+      max-width: 32px;
+      background: #0284c7;
+      border-radius: 4px 4px 0 0;
+      transition: height 0.4s ease, background 0.2s;
+      position: relative;
+    }
+    .bar-col-admin .bar:hover {
+      background: var(--primary);
+    }
+    .bar-col-admin .bar .bar-val {
+      position: absolute;
+      top: -20px;
+      left: 50%;
+      transform: translateX(-50%);
+      font-size: 10px;
+      font-weight: 700;
+      color: var(--muted);
+      white-space: nowrap;
+    }
+    .bar-col-admin .bar-label {
+      font-size: 10.5px;
+      color: var(--muted);
+      font-weight: 600;
+    }
+    .tab-nav {
+      display: flex;
+      gap: 8px;
+      border-bottom: 1px solid var(--line);
+      margin-bottom: 16px;
+    }
+    .tab-nav-btn {
+      all: unset;
+      padding: 8px 16px;
+      font-size: 13px;
+      font-weight: 600;
+      color: var(--muted);
+      cursor: pointer;
+      border-bottom: 2px solid transparent;
+      margin-bottom: -1px;
+      transition: all 0.15s;
+    }
+    .tab-nav-btn.active {
+      color: var(--primary);
+      border-bottom-color: var(--primary);
+    }
+    .alert-card {
+      border-left: 4px solid var(--orange);
+      background: #fffbeb;
+      padding: 12px 14px;
+      border-radius: 6px;
+      margin-bottom: 10px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+    .alert-card.danger {
+      border-left-color: var(--danger);
+      background: #fef2f2;
+    }
+    .alert-card-text {
+      font-size: 12.5px;
+      color: var(--text);
+    }
+    .alert-card-time {
+      font-size: 11px;
+      color: var(--muted);
+      margin-top: 2px;
+    }
+    .server-status-row {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 8px 0;
+      border-bottom: 1px dashed var(--line);
+      font-size: 12.5px;
+    }
+    .server-status-row:last-child {
+      border-bottom: none;
+    }
+    .toast-msg {
+      position: fixed;
+      bottom: 24px;
+      right: 24px;
+      background: #0F2533;
+      color: #fff;
+      padding: 12px 20px;
+      border-radius: 8px;
+      font-size: 13px;
+      font-weight: 600;
+      box-shadow: var(--shadow);
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      z-index: 10000;
+      opacity: 0;
+      transform: translateY(10px);
+      transition: all 0.25s ease;
+      pointer-events: none;
+    }
+    .toast-msg.show {
+      opacity: 1;
+      transform: translateY(0);
+    }
+    .selected-row {
+      background: #f0fdfa !important;
+    }
+  </style>
+</head>
+<body>
+  <div class="app-shell">
+    <!-- SIDEBAR ADMIN (THEO ĐÚNG PDF TRANG 11-16) -->
+    <aside class="sidebar">
+      <div class="brand-box">
+        <div class="brand-icon" style="background:#e0f2fe;">
+          <i class="fa-solid fa-shield-halved" style="color:#0284c7;"></i>
+        </div>
+        <div>
+          <div class="brand-name" style="color:#0284c7;">Anta System</div>
+          <div class="brand-sub">Cổng Quản Trị Hệ Thống</div>
+        </div>
+      </div>
+
+      <!-- Menu QUẢN TRỊ TOÀN SÀN -->
+      <div class="nav-group-title">QUẢN TRỊ TOÀN SÀN</div>
+      <nav class="side-menu">
+        <button class="nav-btn active" data-view="overview" onclick="switchAdminView('overview')">
+          <span class="nav-btn-left"><i class="fa-solid fa-chart-line"></i> Tổng quan</span>
+        </button>
+        <button class="nav-btn" data-view="accounts" onclick="switchAdminView('accounts')">
+          <span class="nav-btn-left"><i class="fa-solid fa-users"></i> Tài khoản</span>
+          <span class="badge" id="badgeAdminAccounts">3</span>
+        </button>
+        <button class="nav-btn" data-view="venues" onclick="switchAdminView('venues')">
+          <span class="nav-btn-left"><i class="fa-solid fa-building"></i> Cơ sở và sân</span>
+        </button>
+        <button class="nav-btn" data-view="all-bookings" onclick="switchAdminView('all-bookings')">
+          <span class="nav-btn-left"><i class="fa-solid fa-book-bookmark"></i> Đơn đặt toàn sàn</span>
+          <span class="badge" style="background:var(--danger);" id="badgeIncidents">1</span>
+        </button>
+        <button class="nav-btn" data-view="payments" onclick="switchAdminView('payments')">
+          <span class="nav-btn-left"><i class="fa-solid fa-credit-card"></i> Thanh toán & Hoàn</span>
+          <span class="badge" id="badgePayments">6</span>
+        </button>
+        <button class="nav-btn" data-view="audit" onclick="switchAdminView('audit')">
+          <span class="nav-btn-left"><i class="fa-solid fa-server"></i> Nhật ký & Cấu hình</span>
+        </button>
+      </nav>
+
+      <!-- Menu LỐI TẮT HỆ THỐNG -->
+      <div class="nav-group-title">LỐI TẮT HỆ THỐNG</div>
+      <nav class="side-menu">
+        <a href="owner.html" class="nav-btn" style="text-decoration:none;">
+          <span class="nav-btn-left"><i class="fa-solid fa-table-tennis-paddle-ball"></i> Cổng Chủ Sân</span>
+        </a>
+        <a href="index.html" class="nav-btn" style="text-decoration:none;">
+          <span class="nav-btn-left"><i class="fa-solid fa-arrow-up-right-from-square"></i> Web Khách Hàng</span>
+        </a>
+      </nav>
+
+      <!-- Profile Super Admin -->
+      <div class="user-profile-bar">
+        <div class="user-profile-info">
+          <div class="avatar-circle admin">QB</div>
+          <div>
+            <div class="user-profile-name" id="adminNameDisplay">Trần Quốc Bảo</div>
+            <div class="user-profile-role">Super Admin</div>
+          </div>
+        </div>
+        <button class="btn-logout" title="Đăng xuất" onclick="logoutAdmin()"><i class="fa-solid fa-right-from-bracket"></i></button>
+      </div>
+    </aside>
+
+    <!-- MAIN VIEWPORT ADMIN -->
+    <main class="main-viewport">
+      <!-- Top header bar -->
+      <div class="top-bar">
+        <div class="top-bar-title">
+          <h1 id="adminPageTitle">Tổng quan toàn hệ thống</h1>
+          <p id="adminPageSubtitle">Số liệu thời gian thực trên toàn bộ 56 cơ sở thể thao đối tác</p>
+        </div>
+        <div class="top-bar-actions">
+          <button class="btn" style="background:#10b981; color:#fff; font-weight:700; border:none;" onclick="simulateLiveBooking()"><i class="fa-solid fa-bolt"></i> Giả lập đơn Live</button>
+          <button class="btn" onclick="refreshAdminData()"><i class="fa-solid fa-rotate"></i> Làm mới</button>
+          <button class="btn" onclick="exportAdminReport()"><i class="fa-solid fa-file-excel"></i> Xuất báo cáo</button>
+          <button class="btn btn-primary" onclick="switchAdminView('payments')"><i class="fa-solid fa-bell"></i> 6 việc cần xử lý</button>
+        </div>
+      </div>
+
+      <!-- =========================================================================
+           VIEW 1: TỔNG QUAN (PDF TRANG 11)
+           ========================================================================= -->
+      <section id="admin-view-overview" class="portal-view">
+        <!-- 5 Stat Cards -->
+        <div class="stats-row">
+          <div class="stat-card">
+            <div class="label">CƠ SỞ HOẠT ĐỘNG</div>
+            <div class="value" style="color:var(--primary);">56 <span style="font-size:14px; font-weight:600; color:var(--muted);">cơ sở</span></div>
+            <div class="sub positive"><i class="fa-solid fa-arrow-trend-up"></i> +4 cơ sở mới tháng này</div>
+          </div>
+          <div class="stat-card">
+            <div class="label">ĐƠN ĐẶT HÔM NAY</div>
+            <div class="value" id="statTodayBookings">482 <span style="font-size:14px; font-weight:600; color:var(--muted);">đơn</span></div>
+            <div class="sub positive"><i class="fa-solid fa-arrow-trend-up"></i> +12% so với hôm qua</div>
+          </div>
+          <div class="stat-card">
+            <div class="label">DOANH THU TOÀN SÀN</div>
+            <div class="value" style="color:var(--green);" id="statTotalRevenue">76.450.000 đ</div>
+            <div class="sub" id="statCommission">Hoa hồng ước tính: 3.822.500 đ</div>
+          </div>
+          <div class="stat-card">
+            <div class="label">NGƯỜI DÙNG MỚI</div>
+            <div class="value">+328 <span style="font-size:14px; font-weight:600; color:var(--muted);">user</span></div>
+            <div class="sub">Trong 7 ngày qua</div>
+          </div>
+          <div class="stat-card">
+            <div class="label">VIỆC CẦN XỬ LÝ</div>
+            <div class="value" style="color:var(--orange);">9 <span style="font-size:14px; font-weight:600; color:var(--muted);">mục</span></div>
+            <div class="sub" style="color:var(--danger); font-weight:600;">6 hoàn tiền & 3 cơ sở duyệt</div>
+          </div>
+        </div>
+
+        <!-- 4 KPI Metrics nâng cao -->
+        <div class="kpi-chip-row">
+          <div class="kpi-chip">
+            <div class="kpi-chip-icon" style="background:#e0f2fe; color:#0284c7;"><i class="fa-solid fa-gauge-high"></i></div>
+            <div>
+              <div class="kpi-chip-val" id="kpiOccupancy">78.4%</div>
+              <div class="kpi-chip-lbl">Tỷ lệ lấp đầy sân TB</div>
+            </div>
+          </div>
+          <div class="kpi-chip">
+            <div class="kpi-chip-icon" style="background:#fef3c7; color:#d97706;"><i class="fa-solid fa-receipt"></i></div>
+            <div>
+              <div class="kpi-chip-val" id="kpiAov">158.600 đ</div>
+              <div class="kpi-chip-lbl">Giá trị đơn TB (AOV)</div>
+            </div>
+          </div>
+          <div class="kpi-chip">
+            <div class="kpi-chip-icon" style="background:#dcfce7; color:#15803d;"><i class="fa-solid fa-shield-check"></i></div>
+            <div>
+              <div class="kpi-chip-val">98.2%</div>
+              <div class="kpi-chip-lbl">Thanh toán tự động thành công</div>
+            </div>
+          </div>
+          <div class="kpi-chip">
+            <div class="kpi-chip-icon" style="background:#f3e8ff; color:#7e22ce;"><i class="fa-solid fa-fire-flame-curved"></i></div>
+            <div>
+              <div class="kpi-chip-val">17:30 - 21:30</div>
+              <div class="kpi-chip-lbl">Khung giờ vàng sôi động nhất</div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Cụm biểu đồ Doanh thu & Tỷ trọng bộ môn (Chart.js) -->
+        <div class="chart-grid-admin">
+          <!-- Cột trái: Xu hướng Doanh thu & Lượng đơn đặt -->
+          <div class="card-box" style="margin-bottom:0;">
+            <div class="card-box-header" style="flex-wrap:wrap; gap:10px;">
+              <div>
+                <div class="card-box-title"><span class="pulse-dot"></span> Doanh thu & Lượng đơn đặt toàn hệ thống</div>
+                <div class="card-box-sub">Biểu đồ kết hợp Doanh thu (VND) và Số đơn theo thời gian thực</div>
+              </div>
+              <div class="chart-filter-group">
+                <button class="chart-filter-btn" id="btnFilter7" onclick="switchChartRange(7)">7 ngày</button>
+                <button class="chart-filter-btn active" id="btnFilter14" onclick="switchChartRange(14)">14 ngày</button>
+                <button class="chart-filter-btn" id="btnFilter30" onclick="switchChartRange(30)">30 ngày</button>
+              </div>
+            </div>
+            <div style="position:relative; height:280px; width:100%;">
+              <canvas id="revenueTrendChart"></canvas>
+            </div>
+          </div>
+
+          <!-- Cột phải: Cơ cấu Doanh thu theo môn thể thao -->
+          <div class="card-box" style="margin-bottom:0;">
+            <div class="card-box-header">
+              <div>
+                <div class="card-box-title">Tỷ trọng môn thể thao</div>
+                <div class="card-box-sub">Cơ cấu doanh thu theo bộ môn</div>
+              </div>
+            </div>
+            <div style="position:relative; height:180px; display:flex; justify-content:center; align-items:center;">
+              <canvas id="sportShareChart"></canvas>
+            </div>
+            <div style="margin-top:14px;">
+              <div class="sport-legend-item">
+                <span><span class="sport-dot" style="background:#0A93A3;"></span> Cầu lông</span>
+                <strong>42% (32.1tr)</strong>
+              </div>
+              <div class="sport-legend-item">
+                <span><span class="sport-dot" style="background:#3FAE3A;"></span> Bóng đá mini</span>
+                <strong>31% (23.7tr)</strong>
+              </div>
+              <div class="sport-legend-item">
+                <span><span class="sport-dot" style="background:#E07A10;"></span> Pickleball</span>
+                <strong>15% (11.5tr)</strong>
+              </div>
+              <div class="sport-legend-item">
+                <span><span class="sport-dot" style="background:#8b5cf6;"></span> Tennis & Khác</span>
+                <strong>12% (9.1tr)</strong>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- 2 Panels bên dưới: Việc cần chú ý & Top cơ sở -->
+        <div class="two-cols">
+          <!-- Việc cần chú ý ngay -->
+          <div class="card-box">
+            <div class="card-box-header">
+              <div class="card-box-title"><i class="fa-solid fa-triangle-exclamation" style="color:var(--orange);"></i> Việc cần chú ý ngay</div>
+              <span class="status-pill pending-payment">3 mục khẩn</span>
+            </div>
+            <div class="alert-card danger">
+              <div>
+                <div class="alert-card-text"><strong>Sự cố mất điện đơn AN-1410-0118</strong>: Khách khiếu nại sân Tân Bình đóng cửa không báo trước.</div>
+                <div class="alert-card-time"><i class="fa-solid fa-clock"></i> 25 phút trước &bull; Yêu cầu hoàn 320.000 đ</div>
+              </div>
+              <button class="btn btn-danger" onclick="viewIncidentDetail('AN-1410-0118')">Xử lý ngay</button>
+            </div>
+            <div class="alert-card">
+              <div>
+                <div class="alert-card-text"><strong>Đơn đăng ký đối tác mới</strong>: Cơ sở "Sân Cầu Lông Bình Thạnh Sport" gửi hồ sơ giấy phép KD.</div>
+                <div class="alert-card-time"><i class="fa-solid fa-clock"></i> 1 giờ trước &bull; Đang chờ thẩm định</div>
+              </div>
+              <button class="btn btn-primary" onclick="switchAdminView('venues')">Xem duyệt</button>
+            </div>
+            <div class="alert-card">
+              <div>
+                <div class="alert-card-text"><strong>Chuyển khoản VietQR sai nội dung</strong>: Nhận 240.000 đ từ STK VPBank 8829... chưa gán được mã đơn.</div>
+                <div class="alert-card-time"><i class="fa-solid fa-clock"></i> 2 giờ trước &bull; Cần đối soát thủ công</div>
+              </div>
+              <button class="btn" onclick="switchAdminView('payments')">Gán đơn</button>
+            </div>
+          </div>
+
+          <!-- Top cơ sở nhiều đơn nhất tuần -->
+          <div class="card-box">
+            <div class="card-box-header">
+              <div class="card-box-title"><i class="fa-solid fa-trophy" style="color:var(--orange);"></i> Cơ sở nhiều đơn nhất tuần</div>
+              <span class="status-pill confirmed">Top 5</span>
+            </div>
+            <div class="table-responsive">
+              <table class="anta-table">
+                <thead>
+                  <tr>
+                    <th>Hạng</th>
+                    <th>Tên cơ sở</th>
+                    <th>Số đơn</th>
+                    <th style="text-align:right;">Doanh thu</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr>
+                    <td><strong style="color:var(--orange);">#1 🥇</strong></td>
+                    <td><strong>Anta Arena Thủ Đức</strong></td>
+                    <td><span class="status-pill confirmed">412 đơn</span></td>
+                    <td style="text-align:right; font-weight:700;">64.200.000 đ</td>
+                  </tr>
+                  <tr>
+                    <td><strong style="color:#64748b;">#2 🥈</strong></td>
+                    <td><strong>Sân Cầu Lông Tân Bình Sport</strong></td>
+                    <td><span class="status-pill confirmed">380 đơn</span></td>
+                    <td style="text-align:right; font-weight:700;">58.900.000 đ</td>
+                  </tr>
+                  <tr>
+                    <td><strong style="color:#b45309;">#3 🥉</strong></td>
+                    <td><strong>Pickleball Hub Quận 7</strong></td>
+                    <td><span class="status-pill confirmed">345 đơn</span></td>
+                    <td style="text-align:right; font-weight:700;">55.100.000 đ</td>
+                  </tr>
+                  <tr>
+                    <td><strong>#4</strong></td>
+                    <td><strong>Sân Kỳ Hòa Quận 10</strong></td>
+                    <td><span class="status-pill">298 đơn</span></td>
+                    <td style="text-align:right; font-weight:700;">44.300.000 đ</td>
+                  </tr>
+                  <tr>
+                    <td><strong>#5</strong></td>
+                    <td><strong>Sân Cầu Lông Bình Thạnh Pro</strong></td>
+                    <td><span class="status-pill">265 đơn</span></td>
+                    <td style="text-align:right; font-weight:700;">39.800.000 đ</td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- =========================================================================
+           VIEW 2: TÀI KHOẢN (PDF TRANG 12)
+           ========================================================================= -->
+      <section id="admin-view-accounts" class="portal-view" style="display:none;">
+        <div class="tab-nav">
+          <button class="tab-nav-btn active" onclick="filterAccountRole('all', this)">Tất cả (1.315)</button>
+          <button class="tab-nav-btn" onclick="filterAccountRole('Khách hàng', this)">Khách hàng (1.240)</button>
+          <button class="tab-nav-btn" onclick="filterAccountRole('Chủ sân', this)">Chủ sân (62)</button>
+          <button class="tab-nav-btn" onclick="filterAccountRole('Admin', this)">Quản trị viên (5)</button>
+          <button class="tab-nav-btn" onclick="filterAccountRole('locked', this)">Bị khóa (8)</button>
+        </div>
+
+        <div class="two-cols">
+          <!-- Bảng tài khoản bên trái -->
+          <div>
+            <div class="filter-bar">
+              <div class="search-input-wrap" style="width:100%;">
+                <i class="fa-solid fa-magnifying-glass search-icon"></i>
+                <input type="text" id="accountSearchInput" placeholder="Tìm theo mã TK, tên, email, số điện thoại..." oninput="onSearchAccounts()">
+              </div>
+            </div>
+            <div class="table-responsive">
+              <table class="anta-table">
+                <thead>
+                  <tr>
+                    <th>Mã TK</th>
+                    <th>Họ và tên</th>
+                    <th>Email / SĐT</th>
+                    <th>Vai trò</th>
+                    <th>Trạng thái</th>
+                    <th style="text-align:right;">Thao tác</th>
+                  </tr>
+                </thead>
+                <tbody id="accountsTableBody">
+                  <!-- Render động -->
+                </tbody>
+              </table>
+            </div>
+          </div>
+
+          <!-- Chi tiết tài khoản bên phải -->
+          <div class="card-box">
+            <div class="card-box-header">
+              <div class="card-box-title"><i class="fa-solid fa-id-card"></i> Chi tiết tài khoản</div>
+              <span class="status-pill confirmed" id="accDtlStatus">Hoạt động</span>
+            </div>
+            <div style="display:flex; align-items:center; gap:12px; margin-bottom:16px;">
+              <div class="avatar-circle" style="width:48px; height:48px; font-size:16px;" id="accDtlAvatar">MT</div>
+              <div>
+                <div style="font-size:16px; font-weight:800;" id="accDtlName">Nguyễn Minh Tâm</div>
+                <div style="font-size:12px; color:var(--muted);" id="accDtlId">Mã TK: TK002</div>
+              </div>
+            </div>
+
+            <div style="display:flex; flex-direction:column; gap:10px; font-size:13px; margin-bottom:16px;">
+              <div><strong>Email:</strong> <span id="accDtlEmail">chusan@gmail.com</span></div>
+              <div><strong>Số điện thoại:</strong> <span id="accDtlPhone">0988 123 456</span></div>
+              <div><strong>Vai trò hiện tại:</strong> <span class="status-pill pending-confirm" id="accDtlRole">Chủ sân</span></div>
+              <div><strong>Ngày tham gia:</strong> <span id="accDtlCreatedAt">10/01/2026</span></div>
+              <div><strong>Cơ sở phụ trách:</strong> <span id="accDtlVenue">Anta Arena Thủ Đức</span></div>
+              <div><strong>Số lượt đặt sân:</strong> <span id="accDtlBookings">38 lượt đặt</span></div>
+            </div>
+
+            <div style="border-top:1px solid var(--line); padding-top:14px; display:flex; flex-direction:column; gap:8px;">
+              <button class="btn btn-primary" style="width:100%; justify-content:center;" onclick="openRoleModal()">
+                <i class="fa-solid fa-user-gear"></i> Phân quyền / Đổi vai trò
+              </button>
+              <button class="btn" style="width:100%; justify-content:center;" id="btnToggleLockAcc" onclick="toggleLockAccount()">
+                <i class="fa-solid fa-lock"></i> Khóa tài khoản này
+              </button>
+              <button class="btn" style="width:100%; justify-content:center;" onclick="resetAccPassword()">
+                <i class="fa-solid fa-key"></i> Đặt lại mật khẩu mặc định
+              </button>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- =========================================================================
+           VIEW 3: CƠ SỞ VÀ SÂN (PDF TRANG 13)
+           ========================================================================= -->
+      <section id="admin-view-venues" class="portal-view" style="display:none;">
+        <div class="tab-nav">
+          <button class="tab-nav-btn active" onclick="filterVenuesTab('active', this)">Đang hoạt động (52)</button>
+          <button class="tab-nav-btn" onclick="filterVenuesTab('pending', this)">Chờ xét duyệt (3)</button>
+          <button class="tab-nav-btn" onclick="filterVenuesTab('paused', this)">Tạm đình chỉ (1)</button>
+        </div>
+
+        <div class="two-cols">
+          <!-- Bảng 56 cơ sở bên trái -->
+          <div>
+            <div class="filter-bar">
+              <div class="search-input-wrap" style="width:100%;">
+                <i class="fa-solid fa-magnifying-glass search-icon"></i>
+                <input type="text" id="venueSearchInput" placeholder="Tìm theo tên cơ sở, địa chỉ, tên chủ..." oninput="onSearchVenues()">
+              </div>
+            </div>
+            <div class="table-responsive">
+              <table class="anta-table">
+                <thead>
+                  <tr>
+                    <th>Tên cơ sở</th>
+                    <th>Địa chỉ</th>
+                    <th>Chủ cơ sở</th>
+                    <th>Quy mô</th>
+                    <th>Trạng thái</th>
+                    <th style="text-align:right;">Thao tác</th>
+                  </tr>
+                </thead>
+                <tbody id="venuesTableBody">
+                  <!-- Render động -->
+                </tbody>
+              </table>
+            </div>
+          </div>
+
+          <!-- Chi tiết cơ sở bên phải -->
+          <div class="card-box">
+            <div class="card-box-header">
+              <div class="card-box-title"><i class="fa-solid fa-building-circle-check"></i> Hồ sơ cơ sở đối tác</div>
+              <span class="status-pill confirmed" id="vnDtlBadge">Đang hoạt động</span>
+            </div>
+            <div style="margin-bottom:14px;">
+              <div style="font-size:17px; font-weight:800; color:var(--text);" id="vnDtlName">Anta Arena Thủ Đức</div>
+              <div style="font-size:12px; color:var(--muted); margin-top:3px;" id="vnDtlAddress">12 Đường Số 8, P. Linh Trung, TP. Thủ Đức</div>
+            </div>
+
+            <div style="display:flex; flex-direction:column; gap:10px; font-size:13px; margin-bottom:16px;">
+              <div><strong>Chủ sân liên kết:</strong> <span id="vnDtlOwner">Nguyễn Minh Tâm (0988 123 456)</span></div>
+              <div><strong>Quy mô sân đấu:</strong> <span id="vnDtlCourts">4 Sân Cầu Lông + 2 Sân Pickleball</span></div>
+              <div><strong>Giờ mở cửa:</strong> <span>06:00 - 23:00 hàng ngày</span></div>
+              <div><strong>Giấy phép kinh doanh:</strong> <span class="status-pill confirmed"><i class="fa-solid fa-check"></i> Đã xác thực</span></div>
+              <div><strong>Doanh thu tháng này:</strong> <strong style="color:var(--green);" id="vnDtlRevenue">42.600.000 đ</strong></div>
+              <div><strong>Đánh giá khách hàng:</strong> <span style="color:var(--orange); font-weight:700;"><i class="fa-solid fa-star"></i> 4.8 / 5.0 (182 lượt)</span></div>
+            </div>
+
+            <div style="border-top:1px solid var(--line); padding-top:14px; display:flex; flex-direction:column; gap:8px;">
+              <button class="btn" style="width:100%; justify-content:center;" onclick="reassignVenueOwner()">
+                <i class="fa-solid fa-user-pen"></i> Đổi chủ sân liên kết
+              </button>
+              <button class="btn" style="width:100%; justify-content:center;" onclick="toggleHideVenue(this)">
+                <i class="fa-solid fa-eye-slash"></i> Tạm ẩn cơ sở khỏi app
+              </button>
+              <button class="btn btn-danger" style="width:100%; justify-content:center;" onclick="suspendVenue()">
+                <i class="fa-solid fa-ban"></i> Đình chỉ hoạt động cơ sở
+              </button>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- =========================================================================
+           VIEW 4: ĐƠN ĐẶT TOÀN HỆ THỐNG (PDF TRANG 14)
+           ========================================================================= -->
+      <section id="admin-view-all-bookings" class="portal-view" style="display:none;">
+        <div class="two-cols">
+          <!-- Bảng đơn toàn hệ thống -->
+          <div>
+            <div class="filter-bar">
+              <div class="search-input-wrap">
+                <i class="fa-solid fa-magnifying-glass search-icon"></i>
+                <input type="text" id="adminBookingsSearch" placeholder="Tìm mã đơn, tên khách, sđt..." oninput="onSearchAdminBookings()">
+              </div>
+              <select class="btn" id="filterVenueAdmin" onchange="onSearchAdminBookings()">
+                <option value="">Tất cả cơ sở (56)</option>
+                <option value="Anta Arena Thủ Đức">Anta Arena Thủ Đức</option>
+                <option value="Sân Tân Bình Sport">Sân Tân Bình Sport</option>
+                <option value="Pickleball Hub Quận 7">Pickleball Hub Quận 7</option>
+              </select>
+            </div>
+            <div class="table-responsive">
+              <table class="anta-table">
+                <thead>
+                  <tr>
+                    <th>Mã đơn</th>
+                    <th>Cơ sở</th>
+                    <th>Khách hàng</th>
+                    <th>Khung giờ</th>
+                    <th>Tổng tiền</th>
+                    <th>Trạng thái</th>
+                    <th style="text-align:right;">Thao tác</th>
+                  </tr>
+                </thead>
+                <tbody id="adminBookingsTbody">
+                  <!-- Render động -->
+                </tbody>
+              </table>
+            </div>
+          </div>
+
+          <!-- Panel xử lý sự cố đơn hàng AN-1410-0118 -->
+          <div class="card-box" id="incidentResolutionPanel">
+            <div class="card-box-header">
+              <div class="card-box-title" style="color:var(--danger);"><i class="fa-solid fa-shield-cat"></i> Xử lý khiếu nại sự cố</div>
+              <span class="status-pill cancelled">Tranh chấp</span>
+            </div>
+            <div style="background:#fef2f2; border:1px solid #fecaca; padding:12px; border-radius:8px; margin-bottom:14px; font-size:12.5px;">
+              <div><strong>Mã đơn sự cố:</strong> <span style="font-weight:700; color:var(--danger);">AN-1410-0118</span></div>
+              <div><strong>Cơ sở:</strong> Sân Cầu Lông Tân Bình Sport</div>
+              <div><strong>Khách hàng:</strong> Đặng Quốc Tuấn (0982 777 666)</div>
+              <div><strong>Số tiền đã thanh toán:</strong> 320.000 đ (VietQR)</div>
+              <div style="margin-top:6px; color:#991b1b;">
+                <strong>Nội dung phản ánh:</strong> "Khách đến sân lúc 18:00 thì thấy sân đóng cửa tối đen do mất điện toàn khu vực, chủ sân không nhắn báo trước làm cả nhóm mất công di chuyển. Đề nghị hoàn 100% tiền sân."
+              </div>
+            </div>
+
+            <div style="font-size:13px; font-weight:700; margin-bottom:8px;">Hành động của Admin:</div>
+            <div style="display:flex; flex-direction:column; gap:8px;">
+              <button class="btn btn-danger" style="width:100%; justify-content:center; padding:10px;" onclick="resolveRefund100()">
+                <i class="fa-solid fa-money-bill-transfer"></i> Phán quyết hoàn 100% (320.000 đ) cho khách
+              </button>
+              <button class="btn" style="width:100%; justify-content:center; padding:10px;" onclick="callVenueOwner('0903 111 222')">
+                <i class="fa-solid fa-phone"></i> Gọi điện cho Chủ sân Tân Bình (0903 111 222)
+              </button>
+              <button class="btn" style="width:100%; justify-content:center; padding:10px;" onclick="warnVenueOwner()">
+                <i class="fa-solid fa-triangle-exclamation"></i> Gửi cảnh cáo trừ điểm uy tín cơ sở
+              </button>
+              <button class="btn" style="width:100%; justify-content:center; padding:10px;" onclick="closeIncident()">
+                <i class="fa-solid fa-circle-check"></i> Đóng hồ sơ khiếu nại
+              </button>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- =========================================================================
+           VIEW 5: THANH TOÁN VÀ HOÀN TIỀN (PDF TRANG 15)
+           ========================================================================= -->
+      <section id="admin-view-payments" class="portal-view" style="display:none;">
+        <div class="stats-row" style="grid-template-columns: repeat(4, 1fr);">
+          <div class="stat-card">
+            <div class="label">CHỜ HOÀN TIỀN</div>
+            <div class="value" style="color:var(--danger);" id="countPendingRefunds">6 <span style="font-size:14px; color:var(--muted); font-weight:600;">đơn</span></div>
+            <div class="sub">Tổng: 1.840.000 đ</div>
+          </div>
+          <div class="stat-card">
+            <div class="label">TIỀN ĐẾN MUỘN CẦN DUYỆT</div>
+            <div class="value" style="color:var(--orange);">4 <span style="font-size:14px; color:var(--muted); font-weight:600;">mục</span></div>
+            <div class="sub">Sai cú pháp chuyển khoản</div>
+          </div>
+          <div class="stat-card">
+            <div class="label">DOANH THU SÀN TẠM GIỮ</div>
+            <div class="value" style="color:var(--primary);">148.200.000 đ</div>
+            <div class="sub">Chờ đối soát định kỳ T2</div>
+          </div>
+          <div class="stat-card">
+            <div class="label">ĐỐI SOÁT TUẦN NÀY</div>
+            <div class="value" style="color:var(--green);">34 / 56 <span style="font-size:14px; color:var(--muted); font-weight:600;">cơ sở</span></div>
+            <div class="sub positive">Đã quyết toán thành công</div>
+          </div>
+        </div>
+
+        <!-- Bảng 1: Danh sách hoàn tiền cần duyệt -->
+        <div class="card-box">
+          <div class="card-box-header">
+            <div>
+              <div class="card-box-title"><i class="fa-solid fa-rotate-left" style="color:var(--danger);"></i> Danh sách yêu cầu hoàn tiền cần Admin duyệt lệnh</div>
+              <div class="card-box-sub">Chủ sân đã đồng ý huỷ &gt; Admin xác nhận hoàn qua cổng VietQR/Ngân hàng</div>
+            </div>
+            <span class="status-pill pending-payment">6 đơn chờ xử lý</span>
+          </div>
+          <div class="table-responsive">
+            <table class="anta-table">
+              <thead>
+                <tr>
+                  <th>Mã đơn</th>
+                  <th>Khách hàng</th>
+                  <th>Cơ sở tổ chức</th>
+                  <th>Ngân hàng nhận</th>
+                  <th>Số tiền hoàn</th>
+                  <th>Lý do huỷ</th>
+                  <th>Duyệt bởi chủ sân</th>
+                  <th style="text-align:right;">Thao tác</th>
+                </tr>
+              </thead>
+              <tbody id="refundAdminTbody">
+                <!-- Render động -->
+              </tbody>
+            </table>
+          </div>
+        </div>
+
+        <!-- Bảng 2: Tiền đến muộn / sai cú pháp -->
+        <div class="card-box">
+          <div class="card-box-header">
+            <div>
+              <div class="card-box-title"><i class="fa-solid fa-clock-rotate-left" style="color:var(--orange);"></i> Giao dịch chuyển khoản đến muộn / Sai cú pháp</div>
+              <div class="card-box-sub">Tiền đã vào tài khoản ngân hàng của Anta nhưng chưa tự động gán vào đơn</div>
+            </div>
+            <span class="status-pill confirmed">Tự động khớp AI gợi ý</span>
+          </div>
+          <div class="table-responsive">
+            <table class="anta-table">
+              <thead>
+                <tr>
+                  <th>Mã GD Ngân hàng</th>
+                  <th>Thời gian</th>
+                  <th>Số tiền</th>
+                  <th>Nội dung chuyển khoản</th>
+                  <th>Khớp đơn dự đoán</th>
+                  <th style="text-align:right;">Thao tác</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td><strong>MB-88392019</strong></td>
+                  <td>14:30 - Hôm nay</td>
+                  <td style="color:var(--green); font-weight:700;">240.000 đ</td>
+                  <td><code>NGUYEN VAN LONG CK TIEN SAN THU DUC</code></td>
+                  <td><span class="status-pill confirmed">AN-1510-0141 (Khớp 98%)</span></td>
+                  <td style="text-align:right;">
+                    <button class="btn btn-green" onclick="matchTransaction('MB-88392019', 'AN-1510-0141')">Gán vào đơn</button>
+                    <button class="btn" onclick="alert('Lệnh hoàn tiền về STK người gửi')">Hoàn trả STK</button>
+                  </td>
+                </tr>
+                <tr>
+                  <td><strong>VCB-47201948</strong></td>
+                  <td>12:15 - Hôm nay</td>
+                  <td style="color:var(--green); font-weight:700;">160.000 đ</td>
+                  <td><code>DAT SAN CAU LONG HOM NAY</code></td>
+                  <td><span class="status-pill pending-confirm">AN-1510-0139 (Khớp 85%)</span></td>
+                  <td style="text-align:right;">
+                    <button class="btn btn-green" onclick="matchTransaction('VCB-47201948', 'AN-1510-0139')">Gán vào đơn</button>
+                    <button class="btn" onclick="alert('Lệnh hoàn tiền về STK người gửi')">Hoàn trả STK</button>
+                  </td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </section>
+
+      <!-- =========================================================================
+           VIEW 6: NHẬT KÝ VÀ HỆ THỐNG (PDF TRANG 16)
+           ========================================================================= -->
+      <section id="admin-view-audit" class="portal-view" style="display:none;">
+        <div class="two-cols">
+          <!-- Bảng audit log bên trái -->
+          <div class="card-box">
+            <div class="card-box-header">
+              <div>
+                <div class="card-box-title"><i class="fa-solid fa-list-check"></i> Nhật ký thao tác quản trị (Audit Logs)</div>
+                <div class="card-box-sub">Ghi lại toàn bộ thao tác bảo mật, phân quyền và duyệt chi trên toàn sàn</div>
+              </div>
+            </div>
+            <div class="table-responsive">
+              <table class="anta-table">
+                <thead>
+                  <tr>
+                    <th>Thời gian</th>
+                    <th>Người thực hiện</th>
+                    <th>Hành động</th>
+                    <th>Địa chỉ IP</th>
+                    <th>Trạng thái</th>
+                  </tr>
+                </thead>
+                <tbody id="auditLogsTbody">
+                  <tr>
+                    <td>14:35 - Hôm nay</td>
+                    <td><strong>Trần Quốc Bảo (Admin)</strong></td>
+                    <td>Duyệt hoàn tiền đơn AN-1510-0130</td>
+                    <td>118.69.182.10</td>
+                    <td><span class="status-pill confirmed">Thành công</span></td>
+                  </tr>
+                  <tr>
+                    <td>14:00 - Hôm nay</td>
+                    <td><strong>Nguyễn Minh Tâm (Chủ sân)</strong></td>
+                    <td>Chấp nhận huỷ đơn AN-1510-0130</td>
+                    <td>14.161.22.45</td>
+                    <td><span class="status-pill confirmed">Thành công</span></td>
+                  </tr>
+                  <tr>
+                    <td>11:20 - Hôm nay</td>
+                    <td><strong>Trần Quốc Bảo (Admin)</strong></td>
+                    <td>Khóa tài khoản TK089 (Spam đơn ảo)</td>
+                    <td>118.69.182.10</td>
+                    <td><span class="status-pill confirmed">Thành công</span></td>
+                  </tr>
+                  <tr>
+                    <td>09:15 - Hôm nay</td>
+                    <td><strong>Trần Quốc Bảo (Admin)</strong></td>
+                    <td>Phê duyệt cơ sở Anta Arena Thủ Đức</td>
+                    <td>118.69.182.10</td>
+                    <td><span class="status-pill confirmed">Thành công</span></td>
+                  </tr>
+                  <tr>
+                    <td>Hôm qua</td>
+                    <td><strong>Hệ thống AI Cron</strong></td>
+                    <td>Tự động đối soát doanh thu 34 cơ sở</td>
+                    <td>127.0.0.1</td>
+                    <td><span class="status-pill confirmed">Thành công</span></td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+          </div>
+
+          <!-- Trạng thái server & Cấu hình bên phải -->
+          <div>
+            <div class="card-box">
+              <div class="card-box-title" style="margin-bottom:12px;"><i class="fa-solid fa-server"></i> Tình trạng máy chủ & Kết nối</div>
+              <div class="server-status-row">
+                <span>Trạng thái Backend Java</span>
+                <span class="status-pill confirmed"><i class="fa-solid fa-circle"></i> Đang chạy (Port 8080)</span>
+              </div>
+              <div class="server-status-row">
+                <span>Cơ sở dữ liệu Database</span>
+                <span class="status-pill confirmed"><i class="fa-solid fa-database"></i> SQL Server / In-Memory (4ms)</span>
+              </div>
+              <div class="server-status-row">
+                <span>Bộ nhớ RAM máy chủ</span>
+                <span><strong>2.4 GB</strong> / 8.0 GB (30%)</span>
+              </div>
+              <div class="server-status-row">
+                <span>Cổng thanh toán VietQR Webhook</span>
+                <span class="status-pill confirmed">Sẵn sàng (99.98% Uptime)</span>
+              </div>
+              <div class="server-status-row">
+                <span>Dịch vụ SMS OTP / Email</span>
+                <span class="status-pill confirmed">Hoạt động tốt</span>
+              </div>
+            </div>
+
+            <!-- Cài đặt tham số hệ thống -->
+            <div class="card-box">
+              <div class="card-box-title" style="margin-bottom:12px;"><i class="fa-solid fa-sliders"></i> Tham số vận hành sàn</div>
+              <form onsubmit="handleSaveSettings(event)" style="display:flex; flex-direction:column; gap:10px; font-size:13px;">
+                <div>
+                  <label style="font-weight:600; display:block; margin-bottom:4px;">Phí hoa hồng sàn thu trên mỗi đơn:</label>
+                  <div style="display:flex; align-items:center; gap:8px;">
+                    <input type="number" id="settingFee" class="btn" style="width:100px; text-align:right;" value="5">
+                    <span>% trên tổng giá trị đơn</span>
+                  </div>
+                </div>
+                <div>
+                  <label style="font-weight:600; display:block; margin-bottom:4px;">Thời hạn khách được huỷ trước:</label>
+                  <div style="display:flex; align-items:center; gap:8px;">
+                    <input type="number" id="settingCancelHours" class="btn" style="width:100px; text-align:right;" value="6">
+                    <span>giờ trước giờ chơi</span>
+                  </div>
+                </div>
+                <div>
+                  <label style="font-weight:600; display:block; margin-bottom:4px;">Khách được đặt trước tối đa:</label>
+                  <div style="display:flex; align-items:center; gap:8px;">
+                    <input type="number" id="settingMaxDays" class="btn" style="width:100px; text-align:right;" value="14">
+                    <span>ngày</span>
+                  </div>
+                </div>
+                <button type="submit" class="btn btn-primary" style="margin-top:6px; justify-content:center;">
+                  <i class="fa-solid fa-floppy-disk"></i> Lưu cài đặt sàn
+                </button>
+              </form>
+            </div>
+          </div>
+        </div>
+      </section>
+
+    </main>
+  </div>
+
+  <!-- MODAL ĐỔI VAI TRÒ TÀI KHOẢN -->
+  <div id="modalRoleChange" class="modal-backdrop" style="display:none;">
+    <div class="modal-card">
+      <div class="modal-card-header">
+        <h3 style="font-size:16px; font-weight:700;"><i class="fa-solid fa-user-shield" style="color:var(--primary);"></i> Phân quyền & Đổi vai trò</h3>
+        <button class="btn" style="border:none;" onclick="closeModal('modalRoleChange')"><i class="fa-solid fa-xmark"></i></button>
+      </div>
+      <div class="modal-card-body" style="font-size:13px;">
+        <p style="margin-bottom:12px;">Đổi vai trò người dùng cho tài khoản: <strong id="mRoleUserName">Nguyễn Minh Tâm</strong></p>
+        <div style="display:flex; flex-direction:column; gap:8px;">
+          <label style="display:flex; align-items:center; gap:8px; padding:8px 12px; border:1px solid var(--line); border-radius:6px; cursor:pointer;">
+            <input type="radio" name="accRoleSelect" value="Khách hàng">
+            <div><strong>Khách hàng:</strong> Chỉ có quyền xem sân và đặt chỗ cá nhân.</div>
+          </label>
+          <label style="display:flex; align-items:center; gap:8px; padding:8px 12px; border:1px solid var(--line); border-radius:6px; cursor:pointer;">
+            <input type="radio" name="accRoleSelect" value="Chủ sân" checked>
+            <div><strong>Chủ sân (Đối tác):</strong> Quản lý cơ sở, lịch đặt, thu chi và dịch vụ sân.</div>
+          </label>
+          <label style="display:flex; align-items:center; gap:8px; padding:8px 12px; border:1px solid var(--line); border-radius:6px; cursor:pointer;">
+            <input type="radio" name="accRoleSelect" value="Admin">
+            <div><strong>Quản trị viên (Admin):</strong> Toàn quyền kiểm soát toàn hệ thống sàn Anta.</div>
+          </label>
+        </div>
+      </div>
+      <div class="modal-card-footer">
+        <button class="btn" onclick="closeModal('modalRoleChange')">Huỷ</button>
+        <button class="btn btn-primary" onclick="confirmRoleChange()"><i class="fa-solid fa-check"></i> Cập nhật quyền</button>
+      </div>
+    </div>
+  </div>
+
+  <div id="toastMessage" class="toast-msg"><i class="fa-solid fa-circle-check" style="color:var(--green); font-size:16px;"></i> <span id="toastText">Thao tác thành công!</span></div>
+
+  <!-- SCRIPT ĐIỀU KHIỂN GIAO DIỆN ADMIN -->
+  <script>
+    // Dữ liệu mẫu chuẩn PDF Anta Admin
+    let accountsData = [
+      { id: 'TK001', name: 'Trần Quốc Bảo', email: 'admin@sportbooking.com', phone: '0901 000 001', role: 'Admin', status: 'active', createdAt: '01/01/2026', venue: 'Toàn sàn', bookings: 0 },
+      { id: 'TK002', name: 'Nguyễn Minh Tâm', email: 'chusan@gmail.com', phone: '0988 123 456', role: 'Chủ sân', status: 'active', createdAt: '10/01/2026', venue: 'Anta Arena Thủ Đức', bookings: 38 },
+      { id: 'TK003', name: 'Lê Hoàng Long', email: 'long.le@gmail.com', phone: '0903 888 999', role: 'Khách hàng', status: 'active', createdAt: '15/02/2026', venue: 'Khách tự do', bookings: 14 },
+      { id: 'TK004', name: 'Nguyễn Văn Nam', email: 'nam.nv@gmail.com', phone: '0918 222 333', role: 'Khách hàng', status: 'active', createdAt: '20/03/2026', venue: 'Khách tự do', bookings: 8 },
+      { id: 'TK005', name: 'Vũ Quốc Tuấn (Tân Bình Sport)', email: 'tanbinh.sport@gmail.com', phone: '0903 111 222', role: 'Chủ sân', status: 'active', createdAt: '05/02/2026', venue: 'Sân Tân Bình Sport', bookings: 54 },
+      { id: 'TK006', name: 'Phạm Thị Thùy', email: 'thuy.pt@gmail.com', phone: '0933 444 555', role: 'Khách hàng', status: 'locked', createdAt: '12/04/2026', venue: 'Khách tự do', bookings: 2 }
+    ];
+
+    let venuesData = [
+      { id: 'VN01', name: 'Anta Arena Thủ Đức', address: '12 Đường Số 8, P. Linh Trung, TP. Thủ Đức', owner: 'Nguyễn Minh Tâm (0988 123 456)', courts: '6 sân (4 Cầu lông, 2 Pickleball)', status: 'active', revenue: 42600000 },
+      { id: 'VN02', name: 'Sân Cầu Lông Tân Bình Sport', address: '45 Hoàng Hoa Thám, P.13, Q. Tân Bình', owner: 'Vũ Quốc Tuấn (0903 111 222)', courts: '8 sân Cầu lông Yonex', status: 'active', revenue: 58900000 },
+      { id: 'VN03', name: 'Pickleball Hub Quận 7', address: 'Số 10 Nguyễn Văn Linh, P. Tân Phong, Q.7', owner: 'Trần Minh Quang (0977 123 456)', courts: '8 sân Pickleball tiêu chuẩn', status: 'active', revenue: 55100000 },
+      { id: 'VN04', name: 'Sân Cầu Lông Kỳ Hòa Quận 10', address: '238 Đường 3/2, Phường 12, Quận 10', owner: 'Phạm Văn Hưng (0912 888 777)', courts: '6 sân Cầu lông thảm gỗ', status: 'active', revenue: 44300000 },
+      { id: 'VN05', name: 'Sân Cầu Lông Bình Thạnh Sport', address: '180 Nơ Trang Long, P.12, Q. Bình Thạnh', owner: 'Đỗ Hữu Đạt (0944 555 666)', courts: '4 sân Cầu lông', status: 'pending', revenue: 0 }
+    ];
+
+    let allBookingsData = [
+      { id: 'AN-1410-0118', venue: 'Sân Tân Bình Sport', customer: 'Đặng Quốc Tuấn', phone: '0982 777 666', time: '18:00 - 20:00 (14/10)', total: 320000, status: 'incident', statusText: 'Sự cố mất điện' },
+      { id: 'AN-1510-0142', venue: 'Anta Arena Thủ Đức', customer: 'Lê Hoàng Long', phone: '0903 888 999', time: '17:00 - 19:00 (Hôm nay)', total: 300000, status: 'pending', statusText: 'Chờ nhận ca' },
+      { id: 'AN-1510-0141', venue: 'Anta Arena Thủ Đức', customer: 'Nguyễn Văn Nam', phone: '0918 222 333', time: '18:00 - 20:00 (Hôm nay)', total: 240000, status: 'confirmed', statusText: 'Đã xác nhận' },
+      { id: 'AN-1510-0140', venue: 'Pickleball Hub Quận 7', customer: 'Trần Minh Quang', phone: '0977 123 456', time: '19:00 - 21:00 (Hôm nay)', total: 355000, status: 'confirmed', statusText: 'Đã xác nhận' },
+      { id: 'AN-1510-0130', venue: 'Anta Arena Thủ Đức', customer: 'Lê Văn Đức', phone: '0912 345 678', time: '19:00 - 21:00 (Hôm nay)', total: 240000, status: 'refund_req', statusText: 'Chờ duyệt hoàn tiền' }
+    ];
+
+    let refundRequestsData = [
+      { id: 'AN-1510-0130', customer: 'Lê Văn Đức', venue: 'Anta Arena Thủ Đức', bank: 'Techcombank - 1903829102', amount: 240000, reason: 'Bận đột xuất công tác', ownerApproved: 'Chấp thuận (Hoàn 100%)' },
+      { id: 'AN-1510-0125', customer: 'Trần Thị Mai', venue: 'Pickleball Hub Q7', bank: 'Vietcombank - 00710098273', amount: 160000, reason: 'Mưa to ngập đường', ownerApproved: 'Chấp thuận (Hoàn 100%)' },
+      { id: 'AN-1410-0118', customer: 'Đặng Quốc Tuấn', venue: 'Sân Tân Bình Sport', bank: 'MB Bank - 882910398', amount: 320000, reason: 'Sân cúp điện đột xuất', ownerApproved: 'Khách khiếu nại sàn' },
+      { id: 'AN-1410-0095', customer: 'Hoàng Anh Tú', venue: 'Sân Kỳ Hòa Q10', bank: 'VPBank - 991823719', amount: 200000, reason: 'Huỷ trước 12 tiếng', ownerApproved: 'Chấp thuận (Hoàn 100%)' },
+      { id: 'AN-1410-0082', customer: 'Vũ Mai Lan', venue: 'Anta Arena Thủ Đức', bank: 'ACB - 28190281', amount: 120000, reason: 'Đổi sang giờ khác', ownerApproved: 'Chấp thuận (Hoàn 50%)' },
+      { id: 'AN-1410-0071', customer: 'Ngô Kiến Huy', venue: 'Pickleball Hub Q7', bank: 'Techcombank - 19027819', amount: 180000, reason: 'Huỷ trước 8 tiếng', ownerApproved: 'Chấp thuận (Hoàn 100%)' }
+    ];
+
+    let currentSelectedAcc = accountsData[1];
+    let currentSelectedVenue = venuesData[0];
+
+    document.addEventListener('DOMContentLoaded', () => {
+      renderOverviewChart();
+      renderAccountsTable(accountsData);
+      renderVenuesTable(venuesData);
+      renderAdminBookingsTable(allBookingsData);
+      renderRefundAdminTable();
+      selectAccount(accountsData[1]);
+      selectVenue(venuesData[0]);
+
+      // Gọi backend API nếu có sẵn
+      fetchBackendUsers();
+    });
+
+    async function fetchBackendUsers() {
+      try {
+        const res = await fetch('/api/admin/users');
+        if (res.ok) {
+          const list = await res.json();
+          console.log('[BE] Admin users list loaded:', list);
+        }
+      } catch (_) {}
+    }
+
+    function switchAdminView(viewName) {
+      document.querySelectorAll('.portal-view').forEach(el => el.style.display = 'none');
+      document.querySelectorAll('.side-menu .nav-btn').forEach(btn => btn.classList.remove('active'));
+
+      const target = document.getElementById('admin-view-' + viewName);
+      if (target) target.style.display = 'block';
+
+      const navBtn = document.querySelector(`.side-menu .nav-btn[data-view="${viewName}"]`);
+      if (navBtn) navBtn.classList.add('active');
+
+      const titles = {
+        'overview': { title: 'Tổng quan toàn hệ thống', sub: 'Số liệu thời gian thực trên toàn bộ 56 cơ sở thể thao đối tác' },
+        'accounts': { title: 'Quản lý tài khoản toàn sàn', sub: 'Phân quyền, kiểm tra lịch sử và quản lý trạng thái tài khoản' },
+        'venues': { title: 'Cơ sở & Sân đấu đối tác', sub: 'Thẩm định hồ sơ, giám sát vận hành và phân bổ chủ cơ sở' },
+        'all-bookings': { title: 'Đơn đặt toàn hệ thống', sub: 'Theo dõi toàn bộ đơn đặt và can thiệp giải quyết khiếu nại, sự cố' },
+        'payments': { title: 'Thanh toán & Hoàn tiền', sub: 'Duyệt hoàn tiền VietQR và đối soát tài chính với các đối tác' },
+        'audit': { title: 'Nhật ký & Cấu hình sàn', sub: 'Theo dõi an ninh hệ thống và cấu hình tham số hoa hồng, thời hạn huỷ' }
+      };
+
+      if (titles[viewName]) {
+        document.getElementById('adminPageTitle').innerText = titles[viewName].title;
+        document.getElementById('adminPageSubtitle').innerText = titles[viewName].sub;
+      }
+    }
+
+    // ==========================================
+    // NÂNG CẤP BẢNG ĐIỀU KHIỂN DOANH THU (CHART.JS)
+    // ==========================================
+    let trendChartInstance = null;
+    let sportChartInstance = null;
+    let todayBookingsCount = 482;
+    let totalRevenueAmount = 76450000;
+
+    const chartDatasets = {
+      7: {
+        labels: ['10/10', '11/10', '12/10', '13/10', '14/10', '15/10', 'Hôm nay'],
+        bookings: [470, 510, 535, 440, 430, 465, 482],
+        revenue: [73.5, 81.2, 85.6, 69.8, 68.4, 74.0, 76.45]
+      },
+      14: {
+        labels: ['02/10', '03/10', '04/10', '05/10', '06/10', '07/10', '08/10', '09/10', '10/10', '11/10', '12/10', '13/10', '14/10', 'Hôm nay'],
+        bookings: [380, 410, 460, 495, 420, 390, 415, 430, 470, 510, 535, 440, 430, 482],
+        revenue: [60.8, 65.6, 73.6, 79.2, 67.2, 62.4, 66.4, 68.8, 75.2, 81.6, 85.6, 70.4, 68.8, 76.45]
+      },
+      30: {
+        labels: ['16/09', '18/09', '20/09', '22/09', '24/09', '26/09', '28/09', '30/09', '02/10', '04/10', '06/10', '08/10', '10/10', '12/10', '14/10', 'Hôm nay'],
+        bookings: [340, 365, 390, 420, 410, 435, 460, 445, 380, 460, 420, 415, 470, 535, 430, 482],
+        revenue: [54.2, 58.4, 62.0, 67.2, 65.6, 69.5, 73.6, 71.2, 60.8, 73.6, 67.2, 66.4, 75.2, 85.6, 68.8, 76.45]
+      }
+    };
+
+    function renderOverviewChart() {
+      // Khởi tạo Chart Doanh thu & Đơn đặt
+      const ctxTrend = document.getElementById('revenueTrendChart');
+      if (ctxTrend && typeof Chart !== 'undefined') {
+        if (trendChartInstance) trendChartInstance.destroy();
+
+        const curData = chartDatasets[14];
+        trendChartInstance = new Chart(ctxTrend, {
+          data: {
+            labels: curData.labels,
+            datasets: [
+              {
+                type: 'line',
+                label: 'Doanh thu (Triệu VNĐ)',
+                data: curData.revenue,
+                borderColor: '#0A93A3',
+                backgroundColor: 'rgba(10, 147, 163, 0.12)',
+                borderWidth: 2.8,
+                pointBackgroundColor: '#0A93A3',
+                pointRadius: 4,
+                pointHoverRadius: 6,
+                fill: true,
+                tension: 0.35,
+                yAxisID: 'yRevenue'
+              },
+              {
+                type: 'bar',
+                label: 'Số lượng đơn đặt',
+                data: curData.bookings,
+                backgroundColor: 'rgba(2, 132, 199, 0.45)',
+                hoverBackgroundColor: '#0284c7',
+                borderRadius: 5,
+                maxBarThickness: 24,
+                yAxisID: 'yBookings'
+              }
+            ]
+          },
+          options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            interaction: { mode: 'index', intersect: false },
+            plugins: {
+              legend: {
+                position: 'top',
+                labels: { font: { family: 'Be Vietnam Pro', size: 11.5, weight: '600' }, boxWidth: 14 }
+              },
+              tooltip: {
+                callbacks: {
+                  label: function(context) {
+                    if (context.dataset.type === 'line') {
+                      return ` Doanh thu: ${context.parsed.y.toLocaleString('vi-VN')} Triệu đ`;
+                    }
+                    return ` Lượng đơn: ${context.parsed.y} đơn đặt`;
+                  }
+                }
+              }
+            },
+            scales: {
+              x: {
+                grid: { display: false },
+                ticks: { font: { family: 'Be Vietnam Pro', size: 10.5 } }
+              },
+              yRevenue: {
+                type: 'linear',
+                position: 'left',
+                grid: { color: 'rgba(226, 232, 236, 0.6)' },
+                ticks: {
+                  font: { family: 'Be Vietnam Pro', size: 10.5 },
+                  callback: val => val + 'M'
+                }
+              },
+              yBookings: {
+                type: 'linear',
+                position: 'right',
+                grid: { display: false },
+                ticks: {
+                  font: { family: 'Be Vietnam Pro', size: 10.5 },
+                  callback: val => val + ' đơn'
+                }
+              }
+            }
+          }
+        });
+      }
+
+      // Khởi tạo Donut Chart Tỷ trọng môn thể thao
+      const ctxSport = document.getElementById('sportShareChart');
+      if (ctxSport && typeof Chart !== 'undefined') {
+        if (sportChartInstance) sportChartInstance.destroy();
+
+        sportChartInstance = new Chart(ctxSport, {
+          type: 'doughnut',
+          data: {
+            labels: ['Cầu lông', 'Bóng đá mini', 'Pickleball', 'Tennis & Khác'],
+            datasets: [{
+              data: [42, 31, 15, 12],
+              backgroundColor: ['#0A93A3', '#3FAE3A', '#E07A10', '#8b5cf6'],
+              borderWidth: 2,
+              borderColor: '#ffffff',
+              hoverOffset: 4
+            }]
+          },
+          options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            cutout: '72%',
+            plugins: {
+              legend: { display: false }
+            }
+          }
+        });
+      }
+    }
+
+    function switchChartRange(days) {
+      document.querySelectorAll('.chart-filter-btn').forEach(b => b.classList.remove('active'));
+      const activeBtn = document.getElementById('btnFilter' + days);
+      if (activeBtn) activeBtn.classList.add('active');
+
+      if (!trendChartInstance || !chartDatasets[days]) return;
+      const data = chartDatasets[days];
+      trendChartInstance.data.labels = data.labels;
+      trendChartInstance.data.datasets[0].data = data.revenue;
+      trendChartInstance.data.datasets[1].data = data.bookings;
+      trendChartInstance.update();
+    }
+
+    // Âm thanh thông báo nhẹ nhàng qua Web Audio API (không cần file âm thanh ngoài)
+    function playChimeSound() {
+      try {
+        const AudioCtx = window.AudioContext || window.webkitAudioContext;
+        if (!AudioCtx) return;
+        const ctx = new AudioCtx();
+        const osc = ctx.createOscillator();
+        const gain = ctx.createGain();
+        osc.type = 'sine';
+        osc.frequency.setValueAtTime(587.33, ctx.currentTime); // D5
+        osc.frequency.setValueAtTime(880, ctx.currentTime + 0.1); // A5
+        gain.gain.setValueAtTime(0.12, ctx.currentTime);
+        gain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + 0.45);
+        osc.connect(gain);
+        gain.connect(ctx.destination);
+        osc.start();
+        osc.stop(ctx.currentTime + 0.45);
+      } catch (_) {}
+    }
+
+    // Giả lập nhận đơn đặt sân mới theo thời gian thực (Live Simulation)
+    function simulateLiveBooking() {
+      playChimeSound();
+
+      const sports = [
+        { name: 'Sân Cầu Lông Anta #02 (18:00 - 19:00)', price: 140000 },
+        { name: 'Sân Pickleball Pro #04 (19:00 - 20:30)', price: 180000 },
+        { name: 'Sân Bóng Đá Mini #01 (20:00 - 21:00)', price: 300000 },
+        { name: 'Sân Tennis Thảm Đất Nện #03 (17:00 - 18:00)', price: 250000 }
+      ];
+      const randomItem = sports[Math.floor(Math.random() * sports.length)];
+
+      // Tăng số lượng đơn và doanh thu
+      todayBookingsCount += 1;
+      totalRevenueAmount += randomItem.price;
+      const commission = Math.round(totalRevenueAmount * 0.05);
+
+      const elBookings = document.getElementById('statTodayBookings');
+      if (elBookings) elBookings.innerHTML = `${todayBookingsCount} <span style="font-size:14px; font-weight:600; color:var(--muted);">đơn</span>`;
+
+      const elRevenue = document.getElementById('statTotalRevenue');
+      if (elRevenue) elRevenue.innerText = totalRevenueAmount.toLocaleString('vi-VN') + ' đ';
+
+      const elCommission = document.getElementById('statCommission');
+      if (elCommission) elCommission.innerText = `Hoa hồng ước tính: ${commission.toLocaleString('vi-VN')} đ`;
+
+      // Cập nhật điểm dữ liệu mới nhất trên Chart.js
+      if (trendChartInstance) {
+        const lastIdx = trendChartInstance.data.datasets[1].data.length - 1;
+        trendChartInstance.data.datasets[1].data[lastIdx] += 1;
+        trendChartInstance.data.datasets[0].data[lastIdx] += Math.round((randomItem.price / 1000000) * 100) / 100;
+        trendChartInstance.update('active');
+      }
+
+      showToast(`⚡ [LIVE] Khách vừa đặt: ${randomItem.name} • ${randomItem.price.toLocaleString('vi-VN')} đ`);
+    }
+
+    // Tài khoản
+    function renderAccountsTable(list) {
+      const tbody = document.getElementById('accountsTableBody');
+      if (!list || list.length === 0) {
+        tbody.innerHTML = `<tr><td colspan="6" style="text-align:center; padding:20px; color:var(--muted);">Không có tài khoản phù hợp</td></tr>`;
+        return;
+      }
+
+      tbody.innerHTML = list.map(a => {
+        let roleBadge = 'confirmed';
+        if (a.role === 'Admin') roleBadge = 'pending-confirm';
+        if (a.role === 'Khách hàng') roleBadge = 'completed';
+
+        return `
+          <tr onclick="selectAccountById('${a.id}')" style="cursor:pointer;" class="${currentSelectedAcc && currentSelectedAcc.id === a.id ? 'selected-row' : ''}">
+            <td><strong style="color:var(--primary);">${a.id}</strong></td>
+            <td><strong>${a.name}</strong></td>
+            <td>
+              <div>${a.email}</div>
+              <div style="font-size:11.5px; color:var(--muted);">${a.phone}</div>
+            </td>
+            <td><span class="status-pill ${roleBadge}">${a.role}</span></td>
+            <td><span class="status-pill ${a.status === 'active' ? 'confirmed' : 'cancelled'}">${a.status === 'active' ? 'Hoạt động' : 'Đã khóa'}</span></td>
+            <td style="text-align:right;">
+              <button class="btn" onclick="event.stopPropagation(); selectAccountById('${a.id}')">Xem</button>
+            </td>
+          </tr>
+        `;
+      }).join('');
+    }
+
+    function selectAccountById(id) {
+      const item = accountsData.find(a => a.id === id);
+      if (item) selectAccount(item);
+    }
+
+    function selectAccount(item) {
+      currentSelectedAcc = item;
+      document.getElementById('accDtlAvatar').innerText = item.name.split(' ').map(w => w[0]).slice(-2).join('').toUpperCase();
+      document.getElementById('accDtlName').innerText = item.name;
+      document.getElementById('accDtlId').innerText = 'Mã TK: ' + item.id;
+      document.getElementById('accDtlEmail').innerText = item.email;
+      document.getElementById('accDtlPhone').innerText = item.phone;
+      document.getElementById('accDtlRole').innerText = item.role;
+      document.getElementById('accDtlCreatedAt').innerText = item.createdAt;
+      document.getElementById('accDtlVenue').innerText = item.venue;
+      document.getElementById('accDtlBookings').innerText = item.bookings + ' lượt đặt';
+
+      const st = document.getElementById('accDtlStatus');
+      st.className = 'status-pill ' + (item.status === 'active' ? 'confirmed' : 'cancelled');
+      st.innerText = item.status === 'active' ? 'Hoạt động' : 'Đã khóa';
+
+      const lockBtn = document.getElementById('btnToggleLockAcc');
+      if (item.status === 'active') {
+        lockBtn.innerHTML = '<i class="fa-solid fa-lock"></i> Khóa tài khoản này';
+        lockBtn.className = 'btn';
+      } else {
+        lockBtn.innerHTML = '<i class="fa-solid fa-lock-open"></i> Mở khóa tài khoản';
+        lockBtn.className = 'btn btn-green';
+      }
+
+      renderAccountsTable(accountsData);
+    }
+
+    function toggleLockAccount() {
+      if (!currentSelectedAcc) return;
+      if (currentSelectedAcc.status === 'active') {
+        if (confirm('Khóa tài khoản ' + currentSelectedAcc.name + '? Người này sẽ không thể đăng nhập.')) {
+          currentSelectedAcc.status = 'locked';
+          showToast('Đã khóa tài khoản ' + currentSelectedAcc.id);
+        }
+      } else {
+        currentSelectedAcc.status = 'active';
+        showToast('Đã mở khóa tài khoản ' + currentSelectedAcc.id);
+      }
+      selectAccount(currentSelectedAcc);
+    }
+
+    function resetAccPassword() {
+      if (!currentSelectedAcc) return;
+      if (confirm('Đặt lại mật khẩu cho ' + currentSelectedAcc.name + ' về mặc định: 123456?')) {
+        showToast('Đã cấp mật khẩu mới: 123456 cho ' + currentSelectedAcc.email);
+      }
+    }
+
+    function openRoleModal() {
+      if (!currentSelectedAcc) return;
+      document.getElementById('mRoleUserName').innerText = currentSelectedAcc.name + ' (' + currentSelectedAcc.id + ')';
+      document.getElementById('modalRoleChange').style.display = 'grid';
+    }
+
+    function confirmRoleChange() {
+      if (!currentSelectedAcc) return;
+      const newRole = document.querySelector('input[name="accRoleSelect"]:checked').value;
+      currentSelectedAcc.role = newRole;
+      closeModal('modalRoleChange');
+      selectAccount(currentSelectedAcc);
+      showToast('Đã nâng cấp quyền ' + newRole + ' cho ' + currentSelectedAcc.name);
+    }
+
+    function onSearchAccounts() {
+      const kw = document.getElementById('accountSearchInput').value.toLowerCase().trim();
+      const filtered = accountsData.filter(a => !kw || a.id.toLowerCase().includes(kw) || a.name.toLowerCase().includes(kw) || a.email.toLowerCase().includes(kw) || a.phone.includes(kw));
+      renderAccountsTable(filtered);
+    }
+
+    function filterAccountRole(role, btn) {
+      document.querySelectorAll('#admin-view-accounts .tab-nav-btn').forEach(b => b.classList.remove('active'));
+      btn.classList.add('active');
+
+      if (role === 'all') {
+        renderAccountsTable(accountsData);
+      } else if (role === 'locked') {
+        renderAccountsTable(accountsData.filter(a => a.status === 'locked'));
+      } else {
+        renderAccountsTable(accountsData.filter(a => a.role === role));
+      }
+    }
+
+    // Cơ sở
+    function renderVenuesTable(list) {
+      const tbody = document.getElementById('venuesTableBody');
+      tbody.innerHTML = list.map(v => `
+        <tr onclick="selectVenueById('${v.id}')" style="cursor:pointer;" class="${currentSelectedVenue && currentSelectedVenue.id === v.id ? 'selected-row' : ''}">
+          <td><strong>${v.name}</strong></td>
+          <td><span style="font-size:12px; color:var(--muted);">${v.address}</span></td>
+          <td>${v.owner}</td>
+          <td>${v.courts}</td>
+          <td><span class="status-pill ${v.status === 'active' ? 'confirmed' : 'pending-confirm'}">${v.status === 'active' ? 'Hoạt động' : 'Chờ duyệt'}</span></td>
+          <td style="text-align:right;">
+            <button class="btn" onclick="event.stopPropagation(); selectVenueById('${v.id}')">Chi tiết</button>
+          </td>
+        </tr>
+      `).join('');
+    }
+
+    function selectVenueById(id) {
+      const item = venuesData.find(v => v.id === id);
+      if (item) selectVenue(item);
+    }
+
+    function selectVenue(v) {
+      currentSelectedVenue = v;
+      document.getElementById('vnDtlName').innerText = v.name;
+      document.getElementById('vnDtlAddress').innerText = v.address;
+      document.getElementById('vnDtlOwner').innerText = v.owner;
+      document.getElementById('vnDtlCourts').innerText = v.courts;
+      document.getElementById('vnDtlRevenue').innerText = v.revenue ? v.revenue.toLocaleString() + ' đ' : 'Chưa có';
+
+      const badge = document.getElementById('vnDtlBadge');
+      badge.className = 'status-pill ' + (v.status === 'active' ? 'confirmed' : 'pending-confirm');
+      badge.innerText = v.status === 'active' ? 'Đang hoạt động' : 'Chờ duyệt mở';
+
+      renderVenuesTable(venuesData);
+    }
+
+    function onSearchVenues() {
+      const kw = document.getElementById('venueSearchInput').value.toLowerCase().trim();
+      const filtered = venuesData.filter(v => !kw || v.name.toLowerCase().includes(kw) || v.address.toLowerCase().includes(kw) || v.owner.toLowerCase().includes(kw));
+      renderVenuesTable(filtered);
+    }
+
+    function filterVenuesTab(tab, btn) {
+      document.querySelectorAll('#admin-view-venues .tab-nav-btn').forEach(b => b.classList.remove('active'));
+      btn.classList.add('active');
+      if (tab === 'active') renderVenuesTable(venuesData.filter(v => v.status === 'active'));
+      else if (tab === 'pending') renderVenuesTable(venuesData.filter(v => v.status === 'pending'));
+      else renderVenuesTable(venuesData.filter(v => v.status === 'paused'));
+    }
+
+    function toggleHideVenue(btn) {
+      if (!currentSelectedVenue) return;
+      if (btn.innerText.includes('Tạm ẩn')) {
+        btn.innerHTML = '<i class="fa-solid fa-eye"></i> Hiện cơ sở lên app';
+        showToast('Đã tạm ẩn cơ sở ' + currentSelectedVenue.name + ' khỏi kết quả tìm kiếm của khách.');
+      } else {
+        btn.innerHTML = '<i class="fa-solid fa-eye-slash"></i> Tạm ẩn cơ sở khỏi app';
+        showToast('Đã hiển thị cơ sở ' + currentSelectedVenue.name + ' công khai trên App.');
+      }
+    }
+
+    function suspendVenue() {
+      if (!currentSelectedVenue) return;
+      if (confirm('Đình chỉ hoạt động cơ sở ' + currentSelectedVenue.name + '? Các đơn đặt sắp tới sẽ bị tạm ngưng.')) {
+        currentSelectedVenue.status = 'paused';
+        selectVenue(currentSelectedVenue);
+        showToast('Đã đình chỉ hoạt động cơ sở.');
+      }
+    }
+
+    function reassignVenueOwner() {
+      const newOwner = prompt('Nhập tên & số điện thoại chủ cơ sở mới:');
+      if (newOwner) {
+        currentSelectedVenue.owner = newOwner;
+        selectVenue(currentSelectedVenue);
+        showToast('Đã gán chủ cơ sở mới thành công!');
+      }
+    }
+
+    // Đơn hàng toàn sàn & Sự cố
+    function renderAdminBookingsTable(list) {
+      const tbody = document.getElementById('adminBookingsTbody');
+      tbody.innerHTML = list.map(b => {
+        let pillClass = 'confirmed';
+        if (b.status === 'incident') pillClass = 'cancelled';
+        if (b.status === 'pending') pillClass = 'pending-confirm';
+        if (b.status === 'refund_req') pillClass = 'pending-payment';
+
+        return `
+          <tr>
+            <td><strong style="color:var(--primary);">${b.id}</strong></td>
+            <td><strong>${b.venue}</strong></td>
+            <td>
+              <div>${b.customer}</div>
+              <div style="font-size:11.5px; color:var(--muted);">${b.phone}</div>
+            </td>
+            <td>${b.time}</td>
+            <td><strong>${b.total.toLocaleString()} đ</strong></td>
+            <td><span class="status-pill ${pillClass}">${b.statusText}</span></td>
+            <td style="text-align:right;">
+              <button class="btn ${b.status === 'incident' ? 'btn-danger' : ''}" onclick="viewIncidentDetail('${b.id}')">
+                ${b.status === 'incident' ? '<i class="fa-solid fa-triangle-exclamation"></i> Sự cố' : 'Chi tiết'}
+              </button>
+            </td>
+          </tr>
+        `;
+      }).join('');
+    }
+
+    function onSearchAdminBookings() {
+      const kw = document.getElementById('adminBookingsSearch').value.toLowerCase().trim();
+      const venue = document.getElementById('filterVenueAdmin').value;
+
+      const filtered = allBookingsData.filter(b => {
+        const matchKw = !kw || b.id.toLowerCase().includes(kw) || b.customer.toLowerCase().includes(kw);
+        const matchVenue = !venue || b.venue === venue;
+        return matchKw && matchVenue;
+      });
+      renderAdminBookingsTable(filtered);
+    }
+
+    function viewIncidentDetail(id) {
+      switchAdminView('all-bookings');
+      const panel = document.getElementById('incidentResolutionPanel');
+      panel.scrollIntoView({ behavior: 'smooth' });
+      panel.style.boxShadow = '0 0 0 3px rgba(220, 38, 38, 0.4)';
+      setTimeout(() => panel.style.boxShadow = '', 2000);
+    }
+
+    function resolveRefund100() {
+      if (confirm('Xác nhận phán quyết hoàn 100% (320.000 đ) cho khách hàng Đặng Quốc Tuấn?')) {
+        showToast('Đã phát lệnh hoàn 320.000 đ qua VietQR thành công!');
+        const item = allBookingsData.find(b => b.id === 'AN-1410-0118');
+        if (item) {
+          item.status = 'completed';
+          item.statusText = 'Đã hoàn 100%';
+          renderAdminBookingsTable(allBookingsData);
+        }
+      }
+    }
+
+    function callVenueOwner(phone) {
+      alert('Đang kết nối cuộc gọi VoIP tới Chủ sân: ' + phone);
+    }
+
+    function warnVenueOwner() {
+      showToast('Đã gửi thông báo cảnh cáo và trừ 2 điểm uy tín cơ sở Tân Bình!');
+    }
+
+    function closeIncident() {
+      showToast('Đã lưu và đóng hồ sơ khiếu nại sự cố AN-1410-0118.');
+    }
+
+    // Thanh toán & hoàn tiền
+    function renderRefundAdminTable() {
+      const tbody = document.getElementById('refundAdminTbody');
+      tbody.innerHTML = refundRequestsData.map(r => `
+        <tr>
+          <td><strong style="color:var(--primary);">${r.id}</strong></td>
+          <td><strong>${r.customer}</strong></td>
+          <td>${r.venue}</td>
+          <td><span style="font-size:12px; font-weight:600;">${r.bank}</span></td>
+          <td><strong style="color:var(--danger);">${r.amount.toLocaleString()} đ</strong></td>
+          <td><span style="font-size:12px; color:var(--muted);">${r.reason}</span></td>
+          <td><span class="status-pill confirmed">${r.ownerApproved}</span></td>
+          <td style="text-align:right;">
+            <button class="btn btn-primary" onclick="approveRefundTransfer('${r.id}')"><i class="fa-solid fa-paper-plane"></i> Hoàn tiền ngay</button>
+          </td>
+        </tr>
+      `).join('');
+    }
+
+    function approveRefundTransfer(id) {
+      const item = refundRequestsData.find(r => r.id === id);
+      if (item && confirm('Xác nhận duyệt chuyển khoản hoàn ' + item.amount.toLocaleString() + ' đ tới ' + item.bank + ' (' + item.customer + ')?')) {
+        refundRequestsData = refundRequestsData.filter(r => r.id !== id);
+        renderRefundAdminTable();
+        document.getElementById('countPendingRefunds').innerHTML = `${refundRequestsData.length} <span style="font-size:14px; color:var(--muted); font-weight:600;">đơn</span>`;
+        document.getElementById('badgePayments').innerText = refundRequestsData.length;
+        showToast('Lệnh chuyển khoản hoàn tiền đã gửi qua VietQR Gateway!');
+      }
+    }
+
+    function matchTransaction(transId, orderId) {
+      showToast('Đã gán mã giao dịch ' + transId + ' vào đơn đặt ' + orderId + ' thành công!');
+    }
+
+    // Cài đặt
+    function handleSaveSettings(e) {
+      e.preventDefault();
+      const fee = document.getElementById('settingFee').value;
+      const hours = document.getElementById('settingCancelHours').value;
+      showToast('Đã lưu cấu hình: Phí sàn ' + fee + '%, huỷ trước ' + hours + ' giờ!');
+    }
+
+    function refreshAdminData() {
+      showToast('Đang đồng bộ dữ liệu toàn hệ thống sàn...');
+      fetchBackendUsers();
+      setTimeout(() => showToast('Dữ liệu toàn sàn đã được cập nhật mới nhất!'), 500);
+    }
+
+    function exportAdminReport() {
+      showToast('Đang xuất file Excel thống kê doanh thu và đơn hàng toàn hệ thống...');
+      setTimeout(() => alert('Tải file báo cáo hoàn tất: BaoCaoToanSan_Thang10_2026.xlsx'), 800);
+    }
+
+    function closeModal(id) {
+      document.getElementById(id).style.display = 'none';
+    }
+
+    function showToast(msg) {
+      const t = document.getElementById('toastMessage');
+      document.getElementById('toastText').innerText = msg;
+      t.classList.add('show');
+      setTimeout(() => t.classList.remove('show'), 2800);
+    }
+
+    function logoutAdmin() {
+      if (confirm('Bạn muốn đăng xuất khỏi Cổng Quản trị Super Admin?')) {
+        sessionStorage.removeItem('currentUser');
+        window.location.href = 'login.html';
+      }
+    }
+  </script>
+</body>
+</html>

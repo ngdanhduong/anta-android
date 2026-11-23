@@ -1,0 +1,809 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>SportBooking - Nền tảng Đặt Sân Thể Thao Trực Tuyến</title>
+  <link rel="icon" type="image/png" href="assets/mark.png">
+
+  <!-- Google Fonts Fallback & Local Fonts -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Be+Vietnam+Pro:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+
+  <!-- Leaflet CSS for OpenStreetMap Interactive Map -->
+  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY=" crossorigin=""/>
+
+  <!-- App Stylesheet -->
+  <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+
+  <!-- =========================================================================
+       PRIMARY WEB HEADER NAVBAR
+       ========================================================================= -->
+  <header class="app-navbar">
+    <div class="navbar-container">
+      <div class="navbar-logo" onclick="navigateTo('home')">
+        <img src="assets/mark.png" alt="SportBooking Logo" class="logo-mark">
+        <span class="logo-text">Sport<b>Booking</b></span>
+      </div>
+
+      <nav class="navbar-nav-links">
+        <div class="nav-item active" data-nav="home" onclick="navigateTo('home')">
+          <span>🏠 Trang chủ</span>
+        </div>
+        <div class="nav-item" data-nav="explore" onclick="navigateTo('explore')">
+          <span>🧭 Khám phá</span>
+        </div>
+        <div class="nav-item" data-nav="map" onclick="navigateTo('map')">
+          <span>🗺️ Bản đồ sân</span>
+        </div>
+        <div class="nav-item" data-nav="bookings" onclick="navigateTo('bookings')">
+          <span>📅 Lịch đặt sân</span>
+        </div>
+        <div class="nav-item" data-nav="favorites" onclick="navigateTo('favorites')">
+          <span>❤️ Sân yêu thích</span>
+        </div>
+      </nav>
+
+      <div class="navbar-actions">
+        <a href="owner.html" style="text-decoration: none; display: inline-flex; align-items: center; gap: 5px; padding: 7px 12px; border-radius: 20px; font-size: 13px; font-weight: 600; color: #1e40af; background: #dbeafe; border: 1px solid #bfdbfe; transition: all 0.2s;">
+          <span>🏸 Chủ sân</span>
+        </a>
+        <a href="admin.html" style="text-decoration: none; display: inline-flex; align-items: center; gap: 5px; padding: 7px 12px; border-radius: 20px; font-size: 13px; font-weight: 600; color: #854d0e; background: #fef9c3; border: 1px solid #fde047; transition: all 0.2s;">
+          <span>🛡️ Admin</span>
+        </a>
+
+        <div class="navbar-search-btn" onclick="navigateTo('search')">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+          <span>Tìm kiếm sân…</span>
+        </div>
+
+        <a href="login.html" class="navbar-auth-btn" id="navbar-login-btn" style="text-decoration: none; display: inline-flex; align-items: center; gap: 6px; padding: 7px 14px; border-radius: var(--radius-full); font-size: 13.5px; font-weight: 600; color: var(--primary); background: var(--primary-container); border: 1px solid rgba(18,181,166,0.25); transition: all var(--transition-fast);">
+          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M15 3h4a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2h-4"/><polyline points="10 17 15 12 10 7"/><line x1="15" y1="12" x2="3" y2="12"/></svg>
+          <span id="navbar-login-text">Đăng nhập</span>
+        </a>
+        <div class="navbar-user-chip" id="navbar-user-chip" data-nav="account" onclick="navigateTo('account')" style="display: none;">
+          <div class="user-avatar" id="desktop-user-avatar">K</div>
+          <span class="user-name" id="desktop-user-name">Khách hàng</span>
+        </div>
+      </div>
+    </div>
+  </header>
+
+  <!-- =========================================================================
+       MAIN WEB CONTAINER
+       ========================================================================= -->
+  <div id="app-root">
+    <div id="app-shell">
+
+      <main id="screen-container">
+
+        <!-- =================================================================
+             1. HOME SCREEN (Trang chủ)
+             ================================================================= -->
+        <section class="screen active" id="screen-home">
+          <!-- Header Banner with Gradient -->
+          <div class="header-band">
+            <div class="header-user-row">
+              <div>
+                <div class="header-greeting-sub" id="home-greeting-name">Chào mừng đến với SportBooking 👋</div>
+                <div class="header-greeting-title">Hôm nay bạn muốn chơi môn gì?</div>
+              </div>
+              <div class="header-avatar-btn" id="home-avatar-btn" onclick="navigateTo('account')">H</div>
+            </div>
+            <!-- Search Bar Trigger -->
+            <div class="search-bar-trigger" onclick="navigateTo('search')">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+              <span>Tìm kiếm sân thể thao, khu vực, môn chơi (Pickleball, Cầu lông, Bóng đá…)...</span>
+            </div>
+          </div>
+
+          <!-- Sport Filter Chips -->
+          <div class="sport-filter-scroll" id="home-sport-chips">
+            <!-- Dynamically populated from SPORTS_DATA -->
+          </div>
+
+          <!-- Location Prompt Bar -->
+          <div class="location-prompt-box">
+            <div class="location-prompt-text">
+              <span>📍</span>
+              <span>Bật vị trí GPS để hệ thống sắp xếp các cụm sân thể thao gần bạn nhất</span>
+            </div>
+            <button class="location-prompt-btn" onclick="showToast('Đã định vị vị trí của bạn tại TP.HCM')">Bật vị trí</button>
+          </div>
+
+          <!-- Featured Venues Carousel (Sân nổi bật) -->
+          <div class="section-header">
+            <h2 class="section-title">Sân thể thao nổi bật</h2>
+            <button class="section-action" onclick="showAllVenues('rating')">Xem tất cả</button>
+          </div>
+          <div class="featured-scroll" id="home-featured-cards">
+            <!-- Dynamically populated -->
+          </div>
+
+          <!-- Nearby Venues Feed (Gần bạn) -->
+          <div class="section-header" style="margin-top: 10px;">
+            <h2 class="section-title" id="home-nearby-title">Tất cả sân thể thao</h2>
+            <div style="font-size: 13px; color: var(--on-surface-variant); display: flex; align-items: center; gap: 6px;">
+              <span>Sắp xếp:</span>
+              <select id="sort-selector" onchange="handleSortChange(this.value)" style="border: 1px solid var(--outline-variant); border-radius: 6px; padding: 4px 8px; font-size: 13px; background: #fff; font-family: inherit; cursor: pointer;">
+                <option value="distance">Gần nhất</option>
+                <option value="rating" selected>Đánh giá cao</option>
+                <option value="price">Giá tốt nhất</option>
+              </select>
+            </div>
+          </div>
+          <div class="venue-list-vertical" id="home-venue-list">
+            <!-- Dynamically populated -->
+          </div>
+        </section>
+
+        <!-- =================================================================
+             2. EXPLORE SCREEN (Khám phá)
+             ================================================================= -->
+        <section class="screen" id="screen-explore">
+          <div class="header-band">
+            <div class="header-user-row" style="margin-bottom: 8px;">
+              <div>
+                <h1 style="font-size: 26px; font-weight: 800; color: #fff;">Khám phá địa điểm</h1>
+                <p style="font-size: 15px; opacity: 0.92;">Thể thao và các cụm sân thi đấu phong trào quanh bạn</p>
+              </div>
+              <div class="header-avatar-btn" onclick="navigateTo('search')">
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+              </div>
+            </div>
+          </div>
+
+          <!-- Sports Categories Grid -->
+          <div class="section-header">
+            <h2 class="section-title">Danh mục môn thể thao</h2>
+          </div>
+          <div style="display: grid; grid-template-columns: repeat(auto-fill, minmax(130px, 1fr)); gap: 12px; padding: 0 24px 20px;" id="explore-sports-grid">
+            <!-- Dynamically populated -->
+          </div>
+
+          <!-- Best Rated Ranking -->
+          <div class="section-header" style="margin-top: 10px;">
+            <h2 class="section-title">🏆 Top sân đánh giá cao nhất</h2>
+          </div>
+          <div class="featured-scroll" id="explore-rated-cards">
+            <!-- Dynamically populated -->
+          </div>
+
+          <!-- Best Price -->
+          <div class="section-header" style="margin-top: 10px;">
+            <h2 class="section-title">💰 Sân giá thuê tốt nhất</h2>
+          </div>
+          <div class="venue-list-vertical" id="explore-priced-cards">
+            <!-- Dynamically populated -->
+          </div>
+        </section>
+
+        <!-- =================================================================
+             3. INTERACTIVE MAP SCREEN (Bản đồ)
+             ================================================================= -->
+        <section class="screen" id="screen-map">
+          <div id="map-view-wrapper">
+            <!-- Floating overlay on top of map -->
+            <div class="map-floating-overlay">
+              <div class="search-bar-trigger" onclick="navigateTo('search')" style="box-shadow: var(--shadow-lg); background: #ffffff;">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+                <span>Tìm kiếm sân trực tiếp trên bản đồ…</span>
+              </div>
+              <div class="sport-filter-scroll" id="map-sport-chips" style="padding: 0;">
+                <!-- Sport chips for map filter -->
+              </div>
+            </div>
+
+            <!-- Leaflet Container -->
+            <div id="leaflet-map"></div>
+
+            <!-- Locate Button FAB -->
+            <button class="map-locate-fab" onclick="recenterMap()" title="Vị trí của tôi">
+              <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="7"/><line x1="12" y1="1" x2="12" y2="5"/><line x1="12" y1="19" x2="12" y2="23"/><line x1="5" y1="12" x2="1" y2="12"/><line x1="23" y1="12" x2="19" y2="12"/></svg>
+            </button>
+
+            <!-- Slide-up Venue Preview Card -->
+            <div class="map-venue-preview-slide" id="map-venue-preview" style="display: none;">
+              <!-- Populated when user taps a pin -->
+            </div>
+          </div>
+        </section>
+
+        <!-- =================================================================
+             4. MY BOOKINGS SCREEN (Lịch đặt)
+             ================================================================= -->
+        <section class="screen" id="screen-bookings">
+          <div class="header-band">
+            <h1 style="font-size: 26px; font-weight: 800; color: #fff;">Lịch đặt sân của tôi</h1>
+            <p style="font-size: 15px; opacity: 0.92;">Theo dõi trạng thái, thanh toán và quản lý vé đặt sân</p>
+          </div>
+
+          <!-- Status Filters -->
+          <div class="sport-filter-scroll" id="bookings-status-filter">
+            <div class="sport-chip active" onclick="filterBookings('ALL', this)">Tất cả</div>
+            <div class="sport-chip" onclick="filterBookings('PENDING_PAYMENT', this)">⏳ Chờ thanh toán</div>
+            <div class="sport-chip" onclick="filterBookings('PENDING_OWNER_CONFIRMATION', this)">⌛ Chờ duyệt</div>
+            <div class="sport-chip" onclick="filterBookings('CONFIRMED', this)">✅ Đã xác nhận</div>
+            <div class="sport-chip" onclick="filterBookings('CANCELLED', this)">🚫 Đã huỷ</div>
+          </div>
+
+          <!-- Bookings List Container -->
+          <div class="venue-list-vertical" id="bookings-list-container" style="padding-top: 10px;">
+            <!-- Dynamically populated from SportStore.bookings -->
+          </div>
+        </section>
+
+        <!-- =================================================================
+             5. ACCOUNT / PROFILE SCREEN (Tài khoản)
+             ================================================================= -->
+        <section class="screen" id="screen-account">
+          <div class="header-band" style="padding-bottom: 24px;">
+            <h1 style="font-size: 26px; font-weight: 800; color: #fff;">Tài khoản thành viên</h1>
+            <p style="font-size: 15px; opacity: 0.92;">Quản lý thông tin cá nhân và lịch sử sử dụng</p>
+          </div>
+
+          <!-- User Profile Info Card -->
+          <div class="profile-card">
+            <div class="profile-avatar-large" id="account-avatar-large">H</div>
+            <div style="flex: 1; min-width: 0;">
+              <h2 style="font-size: 19px; font-weight: 700; color: var(--on-surface);" id="account-name-text">Nguyễn Văn Hùng</h2>
+              <p style="font-size: 14px; color: var(--on-surface-variant);" id="account-identifier-text">hung.nguyen@sportbooking.vn</p>
+              <div style="margin-top: 8px;">
+                <span class="sport-tag" style="background: var(--secondary-container); color: var(--on-secondary-container);">✓ Thành viên đã xác thực</span>
+              </div>
+            </div>
+            <button onclick="openEditProfileModal()" style="border: 1px solid var(--outline-variant); background: #fff; width: 40px; height: 40px; border-radius: 50%; cursor: pointer; display: flex; align-items: center; justify-content: center; color: var(--primary);">
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 20h9"/><path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z"/></svg>
+            </button>
+          </div>
+
+          <!-- Stats Overview Row -->
+          <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin: 0 24px 20px;" id="account-stats-row">
+            <div style="background: #fff; border-radius: var(--radius-lg); padding: 16px; border: 1px solid var(--outline-variant); display: flex; align-items: center; gap: 14px; cursor: pointer; box-shadow: var(--shadow-sm);" onclick="navigateTo('bookings')">
+              <div style="width: 48px; height: 48px; border-radius: var(--radius-md); background: var(--primary-container); display: flex; align-items: center; justify-content: center; font-size: 22px;">📅</div>
+              <div>
+                <div style="font-size: 20px; font-weight: 800; color: var(--primary);" id="stat-bookings-count">3</div>
+                <div style="font-size: 13px; color: var(--on-surface-variant);">Lịch đặt sân</div>
+              </div>
+            </div>
+            <div style="background: #fff; border-radius: var(--radius-lg); padding: 16px; border: 1px solid var(--outline-variant); display: flex; align-items: center; gap: 14px; cursor: pointer; box-shadow: var(--shadow-sm);" onclick="navigateTo('favorites')">
+              <div style="width: 48px; height: 48px; border-radius: var(--radius-md); background: #ffe3e0; display: flex; align-items: center; justify-content: center; font-size: 22px;">❤️</div>
+              <div>
+                <div style="font-size: 20px; font-weight: 800; color: var(--brand-heart);" id="stat-favorites-count">2</div>
+                <div style="font-size: 13px; color: var(--on-surface-variant);">Sân yêu thích</div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Settings & Menu List -->
+          <div class="account-menu-list">
+            <div class="account-menu-item" onclick="openEditProfileModal()">
+              <div class="account-menu-left">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+                <span>Chỉnh sửa thông tin cá nhân</span>
+              </div>
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="9 18 15 12 9 6"/></svg>
+            </div>
+            <div class="account-menu-item" onclick="navigateTo('favorites')">
+              <div class="account-menu-left">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/></svg>
+                <span>Danh sách sân yêu thích</span>
+              </div>
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="9 18 15 12 9 6"/></svg>
+            </div>
+            <div class="account-menu-item" onclick="navigateTo('terms')">
+              <div class="account-menu-left">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/></svg>
+                <span>Điều khoản sử dụng & Quy định đặt sân</span>
+              </div>
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="9 18 15 12 9 6"/></svg>
+            </div>
+            <div class="account-menu-item" onclick="showToast('Cảm ơn bạn! Ý kiến đóng góp đã được gửi đến ban quản trị.')">
+              <div class="account-menu-left">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
+                <span>Gửi ý kiến đóng góp & Hỗ trợ kỹ thuật</span>
+              </div>
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="9 18 15 12 9 6"/></svg>
+            </div>
+            <a href="login.html" class="account-menu-item" style="text-decoration: none; color: inherit;">
+              <div class="account-menu-left">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M15 3h4a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2h-4"/><polyline points="10 17 15 12 10 7"/><line x1="15" y1="12" x2="3" y2="12"/></svg>
+                <span>Đăng nhập / Đổi tài khoản khác</span>
+              </div>
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="9 18 15 12 9 6"/></svg>
+            </a>
+            <div class="account-menu-item" onclick="handleLogout()" style="color: var(--brand-heart);">
+              <div class="account-menu-left" style="color: var(--brand-heart);">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="color: var(--brand-heart);"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg>
+                <span>Đăng xuất tài khoản</span>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <!-- =================================================================
+             6. VENUE DETAILS SCREEN (Chi tiết sân)
+             ================================================================= -->
+        <section class="screen" id="screen-venue-detail">
+          <!-- Hero Image & Floating Controls -->
+          <div class="venue-hero-gallery">
+            <img id="detail-hero-img" src="" alt="Venue Image">
+            <button class="hero-floating-btn hero-back-btn" onclick="history.back() || navigateTo('home')">
+              <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="15 18 9 12 15 6"/></svg>
+            </button>
+            <button class="hero-floating-btn hero-heart-btn" id="detail-heart-btn" onclick="toggleCurrentVenueFavorite()">
+              <svg width="22" height="22" viewBox="0 0 24 24" fill="currentColor"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/></svg>
+            </button>
+            <div class="hero-counter-pill" id="detail-photo-count">1/3 ảnh</div>
+          </div>
+
+          <div class="venue-detail-body">
+            <!-- Venue Summary Card -->
+            <div class="venue-detail-header-card">
+              <h1 class="detail-title" id="detail-venue-name">CLB Thể Thao</h1>
+              
+              <div class="detail-meta-row">
+                <div class="card-badge-rating" style="position: static; background: var(--tertiary-container); color: var(--on-tertiary-container);">
+                  <span class="star-icon">★</span>
+                  <span id="detail-venue-rating">4.9</span>
+                  <span style="opacity: 0.8;" id="detail-venue-reviews">(120 đánh giá)</span>
+                </div>
+                <div style="font-size: 13.5px; color: var(--on-surface-variant); display: flex; align-items: center; gap: 6px;">
+                  <span>🕒</span>
+                  <span id="detail-venue-hours">Mở cửa: 06:00 - 23:00</span>
+                </div>
+              </div>
+
+              <div class="card-address-line" style="font-size: 14px; margin: 4px 0;">
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor" style="color: var(--primary);"><path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7zm0 9.5c-1.38 0-2.5-1.12-2.5-2.5s1.12-2.5 2.5-2.5 2.5 1.12 2.5 2.5-1.12 2.5-2.5 2.5z"/></svg>
+                <span id="detail-venue-address">Địa chỉ</span>
+              </div>
+
+              <!-- Available Sports Tags -->
+              <div style="display: flex; gap: 8px; flex-wrap: wrap;" id="detail-sports-tags">
+                <!-- Dynamically populated -->
+              </div>
+
+              <p style="font-size: 14.5px; color: var(--on-surface-variant); line-height: 1.6; margin-top: 6px;" id="detail-venue-desc">
+                Mô tả chi tiết sân.
+              </p>
+            </div>
+
+            <!-- Detail Tabs (Bảng giá, Hình ảnh, Dịch vụ, Quy định) -->
+            <div>
+              <div class="venue-detail-tabs">
+                <div class="venue-tab-item active" onclick="switchDetailTab('prices', this)">Bảng giá thuê</div>
+                <div class="venue-tab-item" onclick="switchDetailTab('photos', this)">Hình ảnh sân</div>
+                <div class="venue-tab-item" onclick="switchDetailTab('services', this)">Dịch vụ tiện ích</div>
+                <div class="venue-tab-item" onclick="switchDetailTab('rules', this)">Nội quy sân bãi</div>
+              </div>
+
+              <!-- Tab Panes -->
+              <div class="venue-tab-pane active" id="tab-pane-prices">
+                <div id="detail-price-lists">
+                  <!-- Dynamically populated -->
+                </div>
+              </div>
+
+              <div class="venue-tab-pane" id="tab-pane-photos">
+                <div style="display: grid; grid-template-columns: repeat(auto-fill, minmax(140px, 1fr)); gap: 12px;" id="detail-photos-grid">
+                  <!-- Dynamically populated -->
+                </div>
+              </div>
+
+              <div class="venue-tab-pane" id="tab-pane-services">
+                <div id="detail-services-list">
+                  <!-- Dynamically populated -->
+                </div>
+              </div>
+
+              <div class="venue-tab-pane" id="tab-pane-rules">
+                <div id="detail-rules-list">
+                  <!-- Dynamically populated -->
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Pinned Sticky Booking Bar -->
+          <div class="venue-pinned-footer">
+            <div class="pinned-footer-inner">
+              <div class="footer-price-info">
+                <span class="footer-price-label">Giá thuê sân tham khảo</span>
+                <span class="footer-price-val" id="detail-footer-price">từ 120.000 đ/giờ</span>
+              </div>
+              <button class="btn-primary-gradient" onclick="openSlotPickerForCurrentVenue()">
+                <span>Chọn giờ đặt sân ngay</span>
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="9 18 15 12 9 6"/></svg>
+              </button>
+            </div>
+          </div>
+        </section>
+
+        <!-- =================================================================
+             7. SLOT PICKER SCREEN (Chọn giờ đặt sân - 14 ngày & Timetable)
+             ================================================================= -->
+        <section class="screen" id="screen-slot-picker">
+          <!-- Top Bar -->
+          <div style="background: #ffffff; padding: 16px 24px; display: flex; align-items: center; gap: 16px; border-bottom: 1px solid var(--outline-variant); position: sticky; top: 0; z-index: 50;">
+            <button class="hero-floating-btn" style="position: static; background: var(--bg); color: var(--on-surface); width: 40px; height: 40px;" onclick="navigateToVenueDetail(currentVenueId)">
+              <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="15 18 9 12 15 6"/></svg>
+            </button>
+            <div>
+              <h2 style="font-size: 18px; font-weight: 800; color: var(--on-surface);">Chọn khung giờ thi đấu</h2>
+              <p style="font-size: 13px; color: var(--on-surface-variant);" id="slot-picker-venue-name">Tên sân</p>
+            </div>
+          </div>
+
+          <!-- 14-Day Calendar Date Picker Carousel -->
+          <div class="date-picker-scroll" id="slot-date-picker">
+            <!-- Dynamically populated with 14 days -->
+          </div>
+
+          <!-- Legend Bar -->
+          <div class="slot-picker-legend">
+            <div class="legend-item"><div class="legend-box free"></div><span>Còn trống</span></div>
+            <div class="legend-item"><div class="legend-box picked"></div><span>Đang chọn</span></div>
+            <div class="legend-item"><div class="legend-box taken"></div><span>Đã có người đặt</span></div>
+          </div>
+
+          <!-- Rule Note Tip -->
+          <div style="background: var(--primary-container); border-radius: var(--radius-md); padding: 12px 18px; margin: 0 24px 16px; font-size: 13.5px; color: var(--on-primary-container); display: flex; align-items: center; gap: 10px;">
+            <span>💡</span>
+            <span>Bạn có thể chọn từ 1 đến 8 giờ liên tiếp trên cùng một sân đấu.</span>
+          </div>
+
+          <!-- Yards & Hours Matrix -->
+          <div class="yard-slots-section" id="slot-yards-container">
+            <!-- Dynamically populated with each yard's bookable slots -->
+          </div>
+
+          <!-- Sticky Slot Selection Summary Sheet -->
+          <div class="slot-summary-sheet" id="slot-selection-summary">
+            <div class="slot-summary-inner">
+              <div>
+                <div style="font-size: 15px; font-weight: 700; color: var(--on-surface);" id="summary-court-name">Chưa chọn giờ</div>
+                <div style="font-size: 12.5px; color: var(--on-surface-variant);" id="summary-time-range">Chọn khung giờ trên bảng</div>
+              </div>
+              <div style="display: flex; align-items: center; gap: 18px;">
+                <div style="text-align: right;">
+                  <div style="font-size: 12px; color: var(--on-surface-variant);">Tạm tính</div>
+                  <div style="font-size: 20px; font-weight: 800; color: var(--tertiary);" id="summary-total-price">0 đ</div>
+                </div>
+                <button class="btn-primary-gradient" id="btn-proceed-booking" disabled onclick="confirmBookingFromSelection()">
+                  <span>Tiếp tục đặt sân</span>
+                </button>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <!-- =================================================================
+             8. BOOKING DETAIL & PAYMENT SCREEN (Thanh toán & Chi tiết vé)
+             ================================================================= -->
+        <section class="screen" id="screen-booking-detail">
+          <!-- Top Bar -->
+          <div style="background: #ffffff; padding: 16px 24px; display: flex; align-items: center; gap: 16px; border-bottom: 1px solid var(--outline-variant);">
+            <button class="hero-floating-btn" style="position: static; background: var(--bg); color: var(--on-surface); width: 40px; height: 40px;" onclick="navigateTo('bookings')">
+              <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="15 18 9 12 15 6"/></svg>
+            </button>
+            <h2 style="font-size: 19px; font-weight: 800;">Chi tiết lượt đặt sân</h2>
+          </div>
+
+          <!-- Dynamic Status Banner -->
+          <div class="booking-status-banner pending" id="booking-detail-banner">
+            <div class="status-banner-icon" id="booking-banner-emoji">⏳</div>
+            <div>
+              <h3 style="font-size: 18px; font-weight: 800;" id="booking-banner-title">Chờ thanh toán</h3>
+              <p style="font-size: 14px;" id="booking-banner-desc">Giữ chỗ còn <b id="booking-countdown-val">15:00</b></p>
+            </div>
+          </div>
+
+          <!-- Booking Facts Card -->
+          <div class="booking-fact-card">
+            <div class="fact-card-venue-header" onclick="navigateToVenueDetail(currentBooking?.branchId)" style="cursor: pointer;">
+              <img id="booking-venue-img" src="" alt="Venue">
+              <div style="flex: 1; min-width: 0;">
+                <h4 style="font-size: 16.5px; font-weight: 700;" id="booking-venue-name">Tên sân</h4>
+                <p style="font-size: 13px; color: var(--on-surface-variant); white-space: nowrap; overflow: hidden; text-overflow: ellipsis;" id="booking-venue-addr">Địa chỉ</p>
+              </div>
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="9 18 15 12 9 6"/></svg>
+            </div>
+
+            <div class="fact-rows-list">
+              <div class="fact-row">
+                <span class="fact-row-label">Sân thi đấu</span>
+                <span class="fact-row-val" id="booking-fact-yard">Sân 1</span>
+              </div>
+              <div class="fact-row">
+                <span class="fact-row-label">Ngày chơi</span>
+                <span class="fact-row-val" id="booking-fact-date">Thứ 6, 06/11/2026</span>
+              </div>
+              <div class="fact-row">
+                <span class="fact-row-label">Khung giờ</span>
+                <span class="fact-row-val" id="booking-fact-time">18:00 - 20:00 (2 giờ)</span>
+              </div>
+              <div class="fact-row">
+                <span class="fact-row-label">Mã đặt lịch</span>
+                <span class="fact-row-val" style="font-family: monospace; font-size: 15px; color: var(--primary);" id="booking-fact-code">BK-98A721</span>
+              </div>
+              <div class="fact-divider"></div>
+              <div class="fact-row fact-row-total">
+                <span class="fact-row-label">Tổng thanh toán</span>
+                <span class="fact-row-val" id="booking-fact-amount">300.000 đ</span>
+              </div>
+            </div>
+          </div>
+
+          <!-- Payment Options (When Pending) -->
+          <div id="booking-payment-actions" style="margin: 0 24px 28px;">
+            <h3 style="font-size: 17px; font-weight: 700; margin-bottom: 12px;">Phương thức thanh toán</h3>
+            <div class="payment-methods-grid">
+              <div class="payment-option-card selected" onclick="selectPaymentMethod(this, 'VietQR')">
+                <span style="font-size: 26px;">🏦</span>
+                <span style="font-size: 13px; font-weight: 700;">VietQR / Momo</span>
+              </div>
+              <div class="payment-option-card" onclick="selectPaymentMethod(this, 'VNPAY')">
+                <span style="font-size: 26px;">💳</span>
+                <span style="font-size: 13px; font-weight: 700;">VNPAY QR</span>
+              </div>
+              <div class="payment-option-card" onclick="selectPaymentMethod(this, 'SANDBOX')">
+                <span style="font-size: 26px;">⚡</span>
+                <span style="font-size: 13px; font-weight: 700;">Thử nghiệm</span>
+              </div>
+            </div>
+
+            <div style="display: flex; flex-direction: column; gap: 12px; margin-top: 16px;">
+              <button class="btn-primary-gradient" style="width: 100%;" onclick="processPayment()">
+                <span>Xác nhận thanh toán ngay</span>
+              </button>
+              <button onclick="confirmCancelBooking()" style="width: 100%; padding: 13px; border-radius: var(--radius-md); border: 1px solid var(--outline); background: transparent; font-weight: 600; color: var(--brand-heart); cursor: pointer;">
+                Huỷ lịch đặt này
+              </button>
+            </div>
+          </div>
+
+          <!-- Check-in QR Code (When Confirmed) -->
+          <div id="booking-confirmed-card" style="display: none; background: #ffffff; border-radius: var(--radius-lg); padding: 24px; border: 1px solid var(--outline-variant); margin: 0 24px 28px; text-align: center;">
+            <h3 style="font-size: 17px; font-weight: 800; color: var(--secondary);">MÃ CHECK-IN TẠI SÂN THI ĐẤU</h3>
+            <p style="font-size: 13.5px; color: var(--on-surface-variant); margin-bottom: 16px;">Xuất trình mã này cho ban quản lý sân khi đến nhận sân chơi</p>
+            <div style="background: var(--bg); display: inline-block; padding: 18px; border-radius: var(--radius-md); border: 1px solid var(--outline-variant);">
+              <!-- Simulated QR Code SVG -->
+              <svg width="160" height="160" viewBox="0 0 100 100" fill="#0f2533">
+                <rect x="0" y="0" width="30" height="30" rx="4" fill="#0A93A3"/>
+                <rect x="5" y="5" width="20" height="20" rx="2" fill="#fff"/>
+                <rect x="9" y="9" width="12" height="12" fill="#0A93A3"/>
+                <rect x="70" y="0" width="30" height="30" rx="4" fill="#0A93A3"/>
+                <rect x="75" y="5" width="20" height="20" rx="2" fill="#fff"/>
+                <rect x="79" y="9" width="12" height="12" fill="#0A93A3"/>
+                <rect x="0" y="70" width="30" height="30" rx="4" fill="#0A93A3"/>
+                <rect x="5" y="75" width="20" height="20" rx="2" fill="#fff"/>
+                <rect x="9" y="79" width="12" height="12" fill="#0A93A3"/>
+                <rect x="40" y="10" width="20" height="6"/>
+                <rect x="40" y="24" width="8" height="14"/>
+                <rect x="55" y="30" width="12" height="8"/>
+                <rect x="40" y="48" width="20" height="20" rx="4" fill="#12B5A6"/>
+                <rect x="70" y="48" width="10" height="14"/>
+                <rect x="85" y="70" width="15" height="15"/>
+                <rect x="40" y="76" width="14" height="14"/>
+              </svg>
+            </div>
+            <div style="margin-top: 18px;">
+              <button onclick="navigateTo('bookings')" class="btn-primary-gradient" style="margin: 0 auto;">
+                <span>Quay về danh sách lịch đặt</span>
+              </button>
+            </div>
+          </div>
+        </section>
+
+        <!-- =================================================================
+             9. SEARCH SCREEN (Tìm kiếm thông minh)
+             ================================================================= -->
+        <section class="screen" id="screen-search">
+          <div style="background: #ffffff; padding: 16px 24px; display: flex; align-items: center; gap: 14px; border-bottom: 1px solid var(--outline-variant); position: sticky; top: 0; z-index: 50;">
+            <button class="hero-floating-btn" style="position: static; background: var(--bg); color: var(--on-surface); width: 40px; height: 40px;" onclick="navigateTo('home')">
+              <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="15 18 9 12 15 6"/></svg>
+            </button>
+            <div style="flex: 1; position: relative;">
+              <input type="text" id="search-input-field" placeholder="Tìm tên sân, quận/huyện, môn thể thao…" oninput="handleLiveSearch(this.value)" style="width: 100%; padding: 12px 42px 12px 16px; border-radius: var(--radius-md); border: 1.5px solid var(--outline); font-size: 15px; font-family: inherit; outline: none;">
+              <button onclick="clearSearchInput()" style="position: absolute; right: 12px; top: 50%; transform: translateY(-50%); border: none; background: none; color: var(--on-surface-variant); cursor: pointer; font-size: 16px;">
+                ✕
+              </button>
+            </div>
+          </div>
+
+          <!-- Recent Searches Tags -->
+          <div id="search-recent-box" style="padding: 18px 24px;">
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px;">
+              <span style="font-size: 14px; font-weight: 700; color: var(--on-surface-variant);">Tìm kiếm gần đây</span>
+              <button onclick="clearSearchHistory()" style="background: none; border: none; font-size: 13px; color: var(--primary); cursor: pointer;">Xoá lịch sử</button>
+            </div>
+            <div style="display: flex; flex-wrap: wrap; gap: 8px;" id="search-recent-chips">
+              <!-- Dynamically populated -->
+            </div>
+          </div>
+
+          <!-- Search Results Header & List -->
+          <div class="section-header">
+            <h2 class="section-title" id="search-results-title">Gợi ý cho bạn</h2>
+          </div>
+          <div class="venue-list-vertical" id="search-results-list">
+            <!-- Dynamically populated with search results -->
+          </div>
+        </section>
+
+        <!-- =================================================================
+             10. FAVORITES SCREEN (Sân yêu thích)
+             ================================================================= -->
+        <section class="screen" id="screen-favorites">
+          <div style="background: #ffffff; padding: 16px 24px; display: flex; align-items: center; gap: 16px; border-bottom: 1px solid var(--outline-variant);">
+            <button class="hero-floating-btn" style="position: static; background: var(--bg); color: var(--on-surface); width: 40px; height: 40px;" onclick="history.back() || navigateTo('home')">
+              <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="15 18 9 12 15 6"/></svg>
+            </button>
+            <h2 style="font-size: 20px; font-weight: 800;">Sân yêu thích của bạn</h2>
+          </div>
+          <div class="venue-list-vertical" id="favorites-list-container" style="padding-top: 20px;">
+            <!-- Dynamically populated from SportStore.favorites -->
+          </div>
+        </section>
+
+        <!-- =================================================================
+             11. TERMS & CONDITIONS SCREEN (Điều khoản)
+             ================================================================= -->
+        <section class="screen" id="screen-terms">
+          <div style="background: #ffffff; padding: 16px 24px; display: flex; align-items: center; gap: 16px; border-bottom: 1px solid var(--outline-variant);">
+            <button class="hero-floating-btn" style="position: static; background: var(--bg); color: var(--on-surface); width: 40px; height: 40px;" onclick="history.back() || navigateTo('account')">
+              <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="15 18 9 12 15 6"/></svg>
+            </button>
+            <h2 style="font-size: 20px; font-weight: 800;">Điều khoản sử dụng</h2>
+          </div>
+          <div style="padding: 26px; background: #fff; border-radius: var(--radius-lg); margin: 20px 24px; border: 1px solid var(--outline-variant); line-height: 1.8; font-size: 15px; box-shadow: var(--shadow-sm);">
+            <h3 style="font-size: 18px; margin-bottom: 12px; color: var(--primary);">Điều khoản dịch vụ nền tảng SportBooking</h3>
+            <p>1. <b>Quy định đặt sân và giữ chỗ:</b> Người dùng có tối đa 15 phút để hoàn tất thanh toán giữ chỗ. Sau thời gian này, khung giờ sẽ tự động được mở lại cho khách hàng khác.</p>
+            <p style="margin-top: 12px;">2. <b>Chính sách hoàn huỷ:</b> Quý khách có thể huỷ lịch đặt trước 12 giờ so với giờ thi đấu để được hoàn tiền 100%. Huỷ trong vòng 4-12 giờ được hoàn 50%. Huỷ dưới 4 giờ hoặc không đến sân không được hoàn tiền.</p>
+            <p style="margin-top: 12px;">3. <b>Nội quy tại sân:</b> Người chơi bắt buộc tuân thủ nội quy riêng của từng sân bãi (mang giày thể thao đúng quy cách, giữ gìn vệ sinh, không xả rác và không gây gổ tại sân).</p>
+            <p style="margin-top: 12px;">4. <b>Bảo vệ dữ liệu cá nhân:</b> Chúng tôi cam kết bảo mật tuyệt đối thông tin cá nhân và lịch sử giao dịch của bạn theo tiêu chuẩn an toàn thông tin.</p>
+          </div>
+        </section>
+
+      </main>
+
+      <!-- =====================================================================
+           RESPONSIVE MOBILE BOTTOM NAV (FOR MOBILE BROWSERS ONLY)
+           ===================================================================== -->
+      <nav id="bottom-nav">
+        <button class="nav-tab-btn active" data-tab="home" onclick="navigateTo('home')">
+          <div class="nav-tab-indicator">
+            <svg viewBox="0 0 24 24" fill="currentColor"><path d="M10 20v-6h4v6h5v-8h3L12 3 2 12h3v8z"/></svg>
+          </div>
+          <span>Trang chủ</span>
+        </button>
+        <button class="nav-tab-btn" data-tab="explore" onclick="navigateTo('explore')">
+          <div class="nav-tab-indicator">
+            <svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm1 17.93c-3.95-.49-7-3.85-7-7.93 0-.62.08-1.21.21-1.79L9 15v1c0 1.1.9 2 2 2v1.93zm6.9-2.54c-.26-.81-1-1.39-1.9-1.39h-1v-3c0-.55-.45-1-1-1H8v-2h2c.55 0 1-.45 1-1V7h2c1.1 0 2-.9 2-2v-.41c2.93 1.19 5 4.06 5 7.41 0 2.08-.8 3.97-2.1 5.39z"/></svg>
+          </div>
+          <span>Khám phá</span>
+        </button>
+        <button class="nav-tab-btn" data-tab="map" onclick="navigateTo('map')">
+          <div class="nav-tab-indicator">
+            <svg viewBox="0 0 24 24" fill="currentColor"><path d="M20.5 3l-.16.03L15 5.1 9 3 3.36 4.9c-.21.07-.36.25-.36.48V20.5c0 .28.22.5.5.5l.16-.03L9 18.9l6 2.1 5.64-1.9c.21-.07.36-.25.36-.48V3.5c0-.28-.22-.5-.5-.5zM15 19l-6-2.11V5l6 2.11V19z"/></svg>
+          </div>
+          <span>Bản đồ</span>
+        </button>
+        <button class="nav-tab-btn" data-tab="bookings" onclick="navigateTo('bookings')">
+          <div class="nav-tab-indicator">
+            <svg viewBox="0 0 24 24" fill="currentColor"><path d="M19 4h-1V2h-2v2H8V2H6v2H5c-1.11 0-1.99.9-1.99 2L3 20c0 1.1.89 2 2 2h14c1.1 0 2-.9 2-2V6c0-1.1-.9-2-2-2zm0 16H5V10h14v10zm0-12H5V6h14v2z"/></svg>
+          </div>
+          <span>Lịch đặt</span>
+        </button>
+        <button class="nav-tab-btn" data-tab="account" onclick="navigateTo('account')">
+          <div class="nav-tab-indicator">
+            <svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm0 2c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z"/></svg>
+          </div>
+          <span>Tài khoản</span>
+        </button>
+      </nav>
+
+    </div>
+  </div>
+
+  <!-- =======================================================================
+       MODALS & DIALOGS
+       ======================================================================= -->
+
+  <!-- Edit Profile Modal -->
+  <div class="modal-backdrop" id="modal-edit-profile">
+    <div class="modal-dialog">
+      <h3 style="font-size: 19px; font-weight: 800;">Chỉnh sửa thông tin thành viên</h3>
+      <div>
+        <label style="font-size: 13px; font-weight: 600; color: var(--on-surface-variant);">Tên hiển thị</label>
+        <input type="text" id="input-edit-name" style="width: 100%; padding: 11px 14px; border-radius: var(--radius-md); border: 1.5px solid var(--outline); font-size: 15px; font-family: inherit; margin-top: 4px;">
+      </div>
+      <div>
+        <label style="font-size: 13px; font-weight: 600; color: var(--on-surface-variant);">Số điện thoại</label>
+        <input type="text" id="input-edit-phone" style="width: 100%; padding: 11px 14px; border-radius: var(--radius-md); border: 1.5px solid var(--outline); font-size: 15px; font-family: inherit; margin-top: 4px;">
+      </div>
+      <div style="display: flex; gap: 10px; margin-top: 8px;">
+        <button onclick="closeModal('modal-edit-profile')" style="flex: 1; padding: 12px; border-radius: var(--radius-md); border: 1px solid var(--outline); background: transparent; font-weight: 600; cursor: pointer;">Huỷ</button>
+        <button onclick="saveUserProfile()" class="btn-primary-gradient" style="flex: 1; padding: 12px;">Lưu thay đổi</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Cancel Booking Confirmation Modal -->
+  <div class="modal-backdrop" id="modal-cancel-booking">
+    <div class="modal-dialog">
+      <div style="font-size: 40px; text-align: center;">⚠️</div>
+      <h3 style="font-size: 19px; font-weight: 800; text-align: center;">Huỷ lượt đặt sân này?</h3>
+      <p style="font-size: 14px; color: var(--on-surface-variant); text-align: center;">Khung giờ thi đấu sẽ được giải phóng cho người khác đặt. Bạn có chắc chắn muốn huỷ không?</p>
+      <div style="display: flex; gap: 10px; margin-top: 8px;">
+        <button onclick="closeModal('modal-cancel-booking')" style="flex: 1; padding: 12px; border-radius: var(--radius-md); border: 1px solid var(--outline); background: transparent; font-weight: 600; cursor: pointer;">Giữ lại</button>
+        <button onclick="doCancelBooking()" style="flex: 1; padding: 12px; border-radius: var(--radius-md); border: none; background: var(--brand-heart); color: #fff; font-weight: 700; cursor: pointer;">Xác nhận huỷ</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Toast Notification Box -->
+  <div class="toast-container" id="toast-box">
+    <span id="toast-message">Thông báo</span>
+  </div>
+
+  <!-- Scripts -->
+  <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo=" crossorigin=""></script>
+  <script src="js/data.js"></script>
+  <script src="js/app.js"></script>
+
+  <!-- Script kiểm tra phân quyền & thông tin tài khoản (RBAC) -->
+  <script>
+    (function() {
+      try {
+        const user = JSON.parse(sessionStorage.getItem('currentUser') || 'null');
+        const loginBtn = document.getElementById('navbar-login-btn');
+        const userChip = document.getElementById('navbar-user-chip');
+
+        if (user && user.vaiTro) {
+          // Phân quyền bảo vệ: Nếu là Admin hoặc Chủ sân thì chuyển về đúng cổng của họ
+          if (user.vaiTro === 'Admin') {
+            window.location.replace('admin.html');
+            return;
+          }
+          if (user.vaiTro === 'Chủ sân') {
+            window.location.replace('owner.html');
+            return;
+          }
+          // Nếu là Khách hàng: Cập nhật thông tin hiển thị
+          if (user.vaiTro === 'Khách hàng') {
+            const nameEl = document.getElementById('desktop-user-name');
+            const avatarEl = document.getElementById('desktop-user-avatar');
+            const homeGreeting = document.getElementById('home-greeting-name');
+            const accountName = document.getElementById('account-name-text');
+            const accountEmail = document.getElementById('account-identifier-text');
+
+            if (user.hoVaTen) {
+              if (nameEl) nameEl.textContent = user.hoVaTen;
+              if (accountName) accountName.textContent = user.hoVaTen;
+              if (homeGreeting) homeGreeting.textContent = `Chào mừng ${user.hoVaTen} trở lại 👋`;
+              if (avatarEl) avatarEl.textContent = user.hoVaTen.trim().charAt(0).toUpperCase();
+            }
+            if (user.email && accountEmail) {
+              accountEmail.textContent = user.email;
+            }
+            // Ẩn nút đăng nhập, hiển thị chip người dùng
+            if (loginBtn) loginBtn.style.display = 'none';
+            if (userChip) userChip.style.display = 'inline-flex';
+          }
+        } else {
+          // Chưa đăng nhập -> Hiện nút Đăng nhập, ẩn chip người dùng
+          if (loginBtn) loginBtn.style.display = 'inline-flex';
+          if (userChip) userChip.style.display = 'none';
+        }
+      } catch (err) {
+        console.warn('Lỗi đọc session user:', err);
+      }
+    })();
+  </script>
+</body>
+</html>
